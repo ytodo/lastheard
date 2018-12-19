@@ -10,6 +10,8 @@
 
 #include "recv.h"
 
+int	m_flag = 0;
+
 /**************************************************
  * ラストハード･ログ生成メインモジュール          *
  **************************************************/
@@ -147,7 +149,7 @@ int slowdata(char *recvbuf)
 	}
 
 	/* sync packetか? */
-	if ((memcmp(sdata, sync, 3) == 0) && m_counter == 0) {
+	if (memcmp(sdata, sync, 3) == 0) {
 		memset(sdata, 0, sizeof(sdata));
 		return;
 	}
@@ -156,6 +158,7 @@ int slowdata(char *recvbuf)
 	if (memcmp(sdata, last, 3) == 0) {
 		printf("\n");
 		m_counter = 0;
+		m_flag = 0;
 		return;
 	}
 
@@ -165,26 +168,28 @@ int slowdata(char *recvbuf)
 	}
 
 	/* ミニヘッダ 0x40 ～0x43 のメッセージを選別 */
-	if ((sdata[0] >= 0x40) && (sdata[0] <= 0x43) && (m_counter % 2 == 0)) {
+	if ((sdata[0] >= 0x40) && (sdata[0] <= 0x43) && (m_flag == 0)) {
 
-	/* メッセージ20 バイトの先頭にタイトル */
-	if (sdata[0] == 0x40) printf(" Short MSG: ");
+		/* メッセージ20 バイトの先頭にタイトル */
+		if (sdata[0] == 0x40) printf(" Short MSG: ");
 
-        /* ミニヘッダ以外の２バイト（16bits）を表示 */
-	printf("%c%c", sdata[1], sdata[2]);
-	if (sdata[0] == 0x43) m_EOF++;
+	        /* ミニヘッダ以外の２バイト（16bits）を表示 */
+		printf("%c%c", sdata[1], sdata[2]);
 		m_counter++;
+		m_flag = 1;
 		return;
 	}
 
 	/* ミニヘッダを含まないブロック３バイト（24bits ）を接続 */
-	if (m_counter % 2 == 1) {
+	if (m_flag == 1) {
 		printf("%c%c%c", sdata[0], sdata[1], sdata[2]);
 		m_counter++;
-		if (m_EOF >= 1) {
-			m_EOF = 0;
-			m_counter = 0;
-		}
-		return;
 	}
+
+	/* メッセージの末尾又は合成パケット四つ分(カウント８）でクリア */
+	if (m_counter > 7) {
+		m_flag = 2;
+	}
+
+	return (0);
 }
