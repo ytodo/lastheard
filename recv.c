@@ -50,19 +50,10 @@ int main(void)
                                 strftime(tmstr, N, "%Y/%m/%d %H:%M:%S", timeptr);
 				if (strcmp(tmstr, tmstrpre) == 0) break;
 				strcpy(tmstrpre, tmstr);
-
-                                printf("----------------------------------------");
-                                printf("---------------------------------");
-                                printf("\n");
-
-                                /* rpt1 */
-                                printf(" rpt1: ");
-                                for (j = 0; j < 8; ++j)
-                                        printf("%c", recvbuf[28 + j]);
-                                printf(" |");
+                                printf("%s", tmstr);
 
                                 /* My   */
-                                printf(" my: ");
+                                printf(" D-STAR my: ");
                                 for (j = 0; j < 8; ++j)
                                         printf("%c", recvbuf[44 + j]);
                                 printf("/");
@@ -70,18 +61,17 @@ int main(void)
                                         printf("%c", recvbuf[52 + j]);
                                 printf(" |");
 
+                                /* rpt1 */
+                                printf(" rpt1: ");
+                                for (j = 0; j < 8; ++j)
+                                        printf("%c", recvbuf[28 + j]);
+                                printf(" |");
+
                                 /* ur   */
                                 printf(" ur: ");
                                 for (j = 0; j < 8; ++j)
                                         printf("%c", recvbuf[36 + j]);
                                 printf(" |");
-
-
-                                printf(" %s\n", tmstr);
-
-                                printf("----------------------------------------");
-                                printf("---------------------------------");
-                                printf("\n");
 
                                 break;
 
@@ -128,7 +118,7 @@ int main(void)
                                 if ((sdata[0] >= 0x40) && (sdata[0] <= 0x43) && (m_counter % 2 == 0)) {
 
 					/* メッセージ20 バイトの先頭にタイトル */
-					if (sdata[0] == 0x40) printf(" Short MSG : ");
+					if (sdata[0] == 0x40) printf(" Short MSG: ");
 
                         	        /* ミニヘッダ以外の２バイト（16bits）を表示 */
                                 	printf("%c%c", sdata[1], sdata[2]);
@@ -140,15 +130,15 @@ int main(void)
 	                	/* ミニヘッダを含まないブロック３バイト（24bits ）を接続 */
         	                if (m_counter % 2 == 1) {
         	      	                printf("%c%c%c", sdata[0], sdata[1], sdata[2]);
-	                                if (m_EOF >= 1) {
-        	                       	        printf("\n");
-                	                       	m_EOF = 0;
-	                                }
-	       	                        if (m_counter > 20) {
-                	               	        printf("\n");
-                        	               	m_counter = 0;
-	                                }
 					m_counter++;
+	                                if (m_EOF >= 1) {
+                	                       	m_EOF = 0;
+						m_counter = 0;
+	                                }
+//	       	                        if (m_counter > 20) {
+//                	               	        printf("\n");
+//                        	               	m_counter = 0;
+//	                                }
 					break;
 				}
 
@@ -164,11 +154,7 @@ int main(void)
                 }
         }
 
-        /* 受信データの出力             */
-//      printf("Content-type: text/html\n\n");
-//      printf("<html><head></head><body>\n");
-//      printf("%s\n", recvbuf);
-//      printf("</body></html>\n");
+      printf("</body></html>\n");
 
         /* ソケットのクローズ   */
         close(sock);
