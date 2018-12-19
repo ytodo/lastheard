@@ -184,6 +184,7 @@ int slowdata(char *recvbuf)
 	if (m_flag == 1) {
 		printf("%c%c%c", sdata[0], sdata[1], sdata[2]);
 		m_counter++;
+		m_flag = 0;
 	}
 
 	/* メッセージの末尾又は合成パケット四つ分(カウント８）でクリア */
