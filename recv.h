@@ -3,7 +3,7 @@
  *      recv.h version 00.01                      *
  *      2018.12.17 -                              *
  *                                                *
- *  Multi_Forward が搭載されているリピータの      *
+ *  Xchange が搭載されているリピータの            *
  *  ラストハードを表示する                        *
  *                                                *
  **************************************************/
@@ -24,10 +24,10 @@
 
 /* socket関連*/
 unsigned int sock;
-struct  sockaddr_in addr;
+struct	sockaddr_in addr;
 socklen_t sin_size;
-struct  sockaddr_in from_addr;
-unsigned char   recvbuf[64];		/* 受信バッファ */
+struct	sockaddr_in from_addr;
+char	recvbuf[64];		/* 受信バッファ */
 
 /* 日付表示関連 */
 time_t  timer;
@@ -48,5 +48,9 @@ int     i = 0;
 int     j = 0;
 int     m_counter = 0;
 int     m_EOF = 0;
+
+/* 関数の宣言 */
+int header(char *recvbuf);
+int slowdata(char *recvbuf);
 
 #endif // __RECV_H__
