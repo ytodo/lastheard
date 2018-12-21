@@ -36,18 +36,21 @@ char    tmstr[N] = {'\0'};
 char    tmstrpre[N] = {'\0'};		/* 時刻の同じ二重パケットを排除するため使用 */
 
 /* Voice ShortData関連 */
-char   sdata[3];			/* データセグメント */
-char   sync[] = { 0x55, 0x2d, 0x16 };	/* 同期データ 3bytes */
-char   last[] = { 0x55, 0x55, 0x55 };	/* last flame */
-char   scbl[] = { 0x70, 0x4f, 0x93 };	/* scranbleパターン */
-char   mesg[32];
+char	sdata[3];			/* データセグメント */
+char	sync[] = { 0x55, 0x2d, 0x16 };	/* 同期データ 3bytes */
+char	last[] = { 0x55, 0x55, 0x55 };	/* last flame */
+char	scbl[] = { 0x70, 0x4f, 0x93 };	/* scranbleパターン */
+char	mesg[32];
 
 /* その他 */
-char	c;
+char	*LOGFILE = "/var/log/lastheard.log";
+char	logline[N] = {'\0'};
+char	line[32] = {'\0'};
+char	c[1] = {'\0'};
 int     i = 0;
 int     j = 0;
+int     m_flag = 0;
 int     m_counter = 0;
-int     m_EOF = 0;
 
 /* 関数の宣言 */
 int header(char *recvbuf);

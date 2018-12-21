@@ -10,8 +10,6 @@
 
 #include "recv.h"
 
-int	m_flag = 0;
-
 /**************************************************
  * ラストハード･ログ生成メインモジュール          *
  **************************************************/
@@ -106,24 +104,43 @@ int header(char *recvbuf)
 {
 
 	/* access time  */
-	printf("%s", tmstr);
+	sprintf(logline, "%s", tmstr);
 
 	/* My   */
-	printf(" D-STAR my: ");
-	for (j = 0; j < 8; ++j)	printf("%c", recvbuf[44 + j]);
-	printf("/");
-	for (j = 0; j < 4; ++j) printf("%c", recvbuf[52 + j]);
-	printf(" |");
+	strcat(logline, " D-STAR my: ");
+	line[0] = '\0';
+	for (j = 0; j < 8; ++j) {
+		sprintf(c, "%c", recvbuf[44 + j]);
+		strcat(line, c);
+	}
+	strcat(logline, line);
+	strcat(logline, "/");
+	line[0] = '\0';
+	for (j = 0; j < 4; ++j) {
+		sprintf(c, "%c", recvbuf[52 + j]);
+		strcat(line, c);
+	}
+	strcat(logline, line);
+	strcat(logline, " |");
 
 	/* rpt1 */
-	printf(" rpt1: ");
-	for (j = 0; j < 8; ++j) printf("%c", recvbuf[28 + j]);
-	printf(" |");
+	strcat(logline, " rpt1: ");
+	line[0] = '\0';
+	for (j = 0; j < 8; ++j) {
+		sprintf(c, "%c", recvbuf[28 + j]);
+		strcat(line, c);
+	}
+	strcat(logline, line);
 
 	/* ur   */
-	printf(" ur: ");
-	for (j = 0; j < 8; ++j) printf("%c", recvbuf[36 + j]);
-	printf(" |");
+	strcat(logline, " | ur: ");
+	line[0] = '\0';
+	for (j = 0; j < 8; ++j) {
+		sprintf(c, "%c", recvbuf[36 + j]);
+		strcat(line, c);
+	}
+	strcat(logline, line);
+	strcat(logline, " |");
 
 	return (0);
 }
@@ -156,7 +173,9 @@ int slowdata(char *recvbuf)
 
 	/* Last Flameか？ */
 	if (memcmp(sdata, last, 3) == 0) {
-		printf("\n");
+//		printf("%s\n", logline);
+		write(logline);
+		linecount();
 		m_counter = 0;
 		m_flag = 0;
 		return;
@@ -171,10 +190,12 @@ int slowdata(char *recvbuf)
 	if ((sdata[0] >= 0x40) && (sdata[0] <= 0x43) && (m_flag == 0)) {
 
 		/* メッセージ20 バイトの先頭にタイトル */
-		if (sdata[0] == 0x40) printf(" Short MSG: ");
+		if (sdata[0] == 0x40) strcat(logline, " Short MSG: ");
 
 	        /* ミニヘッダ以外の２バイト（16bits）を表示 */
-		printf("%c%c", sdata[1], sdata[2]);
+		line[0] = '\0';
+		sprintf(line, "%c%c", sdata[1], sdata[2]);
+		strcat(logline, line);
 		m_counter++;
 		m_flag = 1;
 		return;
@@ -182,7 +203,9 @@ int slowdata(char *recvbuf)
 
 	/* ミニヘッダを含まないブロック３バイト（24bits ）を接続 */
 	if (m_flag == 1) {
-		printf("%c%c%c", sdata[0], sdata[1], sdata[2]);
+		line[0] = '\0';
+		sprintf(line, "%c%c%c", sdata[0], sdata[1], sdata[2]);
+		strcat(logline, line);
 		m_counter++;
 		m_flag = 0;
 	}
@@ -193,4 +216,83 @@ int slowdata(char *recvbuf)
 	}
 
 	return (0);
+}
+
+
+/**************************************************
+ * ログの一行分をログファイルに出力               *
+ *                                                *
+ * LOGFILE で示すファイルパスに追加で書き込む     *
+ **************************************************/
+int write(char *logline)
+{
+	FILE	*fp;
+
+	/* ログファイルを追加モードでオープンする */
+	if ((fp = fopen(LOGFILE, "a")) == NULL) {
+		printf("File open error!\n");
+		return (-1);
+	}
+
+	/* ログ一行を書き込む */
+	fprintf(fp, "%s\n", logline);
+
+	/* ファイルを閉じる */
+	fclose(fp);
+
+	return (0);
+}
+
+
+
+/**************************************************
+ * ログが規定行数を超えたら古いものから削除       *
+ *                                                *
+ * LOGFILE で示すファイルパスから配列に読み込み   *
+ * 規定を越えた行数分を古いエントリーから省いて   *
+ * 再度上書きする。                               *
+ **************************************************/
+int linecount(void)
+{
+	FILE	*fp;
+	char	buf[N];
+	char	log[N][128];
+	int 	count = 0;
+	int	countMAX = 100;
+	int	countDEL = 50;
+
+	/* ログファイルを読み取りでオープン */
+	if ((fp = fopen(LOGFILE, "r")) == NULL) {
+		printf("File open error!\n");
+		return (-1);
+	}
+
+	/* 各行を2次元配列に入れる */
+	while (fgets(buf, sizeof(buf), fp) != NULL) {
+		sprintf(&log[count][0], "%s", buf);
+		count++;
+  	}
+
+	/* ファイルを閉じる */
+	fclose(fp);
+
+	/* 規定行数を越えたら古い方から指定行数省いて書き込み */
+	if (count > countMAX) {
+
+		/* ログファイルを上書きでオープン */
+		if ((fp = fopen(LOGFILE, "w")) == NULL) {
+			printf("File open error!\n");
+			return (-1);
+		}
+
+		/* */
+		for (i = countDEL; i < count; i++) {
+			fprintf(fp, "%s", &log[i][0]);
+		}
+	}
+
+	/* ファイルを閉じる */
+	fclose(fp);
+
+	return 0;
 }
