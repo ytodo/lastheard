@@ -118,6 +118,7 @@ int header(char *recvbuf)
 	line[0] = '\0';
 	for (j = 0; j < 4; ++j) {
 		sprintf(c, "%c", recvbuf[52 + j]);
+		if (c == '\0' || c == "") strcpy(c, " ");
 		strcat(line, c);
 	}
 	strcat(logline, line);
