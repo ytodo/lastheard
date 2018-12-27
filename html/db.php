@@ -1,4 +1,26 @@
 <?php
+/*
+ *  Copyright (C) 2018 by Yosh Todo JE3HCZ
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ *  本プログラムはD-STAR Network の一部の機能を実現するための物で、
+ *  アマチュア無線の技術習得とその本来の用途以外では使用しないでください。
+ *
+ */
+
     /* 無線機器のカナ表示を有効にするためシフトJIS に設定 */
     header('Content-type:text/html; charset=Shift_JIS');
 
