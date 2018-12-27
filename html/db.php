@@ -1,5 +1,6 @@
 <?php
-    header('Content-type:text/html; charset=UTF-8');
+    /* 無線機器のカナ表示を有効にするためシフトJIS に設定 */
+    header('Content-type:text/html; charset=Shift_JIS');
 
     /* 対象のファイルパス */
     $logpath = '/var/log/lastheard.log';
@@ -29,23 +30,33 @@
 <html lang="ja">
 <head>
     <title>D-STAR DASHBOARD</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
     <link rel="stylesheet" href="css/db.css">
 </head>
 <body>
-<div class="wrapper">
-<?php
+<div class="wrapper"> <!-- 中央表示用ラップ -->
+
+<?php /* WEB ヘッダー */
     echo '<h1>'.$rptname.'</h1>';
-    echo '<h2>'.$rptcall.' Last Heard</h2>';
+    echo '<h2>Last Heard on '.$rptcall.'</h2>';
 ?>
-<table>
+
+<table> <!-- ラストハードリスト--->
     <tr><th>Time</th><th>Callsign</th><th>Sufix</th><th>Type</th><th>UR</th><th>Message</th></tr>
 <?php
     /* 読み込みデータの各行を一行ずつ変数に格納し各データに分解 */
+    $callcmp = [];     /* 配列 */
     foreach ($tmp as $line) {
         if ($count < $lines) {
-            $timestamp = substr($line,  0, 19);
+
+            /* 同じコールサイン（拡張子省く）の場合処理をパスする */
             $callsign  = substr($line, 31,  8);
+            if (in_array($callsign, $callcmp) == true) continue;
+
+            /* 過去に出現（表示レベル）していない場合比較配列に入れる */
+            $callcmp[] = $callsign;
+
+            /* 新たに拡張子も含むコールサインを含めデータ取得 */
+            $timestamp = substr($line,  0, 19);
             $suffix    = substr($line, 40,  4);
             $temp      = substr($line, 60,  1);
             if ($temp == 'A') $type = 'ZR';
@@ -64,11 +75,18 @@
                       <td>'.$message.'</td>
                       </tr>';
             }
+            $count++;
         }
-        $count++;
     }
+
 ?>
-</table>
+    <tr><td colspan=6 class="footer"></td></tr>
+</table> <!-- ラストハードリストend --->
+
+<span class="footer"> <!-- フッター -->
+    &nbsp;&nbsp;D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA
+</span>
+
 </div>
 </body>
 </html>

@@ -7,17 +7,15 @@ body {
 }
 
 .wrapper {
-        margin-right        : auto;
-        margin-left         : auto;
-        width               : 660px;
+        width               : 680px;
         background-color    : #e8a844;
-        margin: 0px auto;
-        padding: 0px;
-        text-align; left;
+        margin              : 0px auto; 
+        padding             : 0px;
 }
 
 h2 {
         color               : white;
+        margin-bottom       : 2px;
 } 
 
 th {
@@ -33,4 +31,10 @@ td {
         padding             : 2px 5px 2px 5px;
 }
 
-
+td.footer {
+        height              : 10px;
+        background-color    : #333399;
+}
+span.footer {
+        font-size           : 10px;
+}
