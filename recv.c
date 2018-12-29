@@ -281,8 +281,8 @@ int linecount(void)
 	char	buf[N];
 	char	log[N][128];
 	int 	count = 0;
-	int	countMAX = 100;
-	int	countDEL = 50;
+	int	countMAX = 1000;
+	int	countDEL = 200;
 
 	/* ログファイルを読み取りでオープン */
 	if ((fp = fopen(LOGFILE, "r")) == NULL) {
