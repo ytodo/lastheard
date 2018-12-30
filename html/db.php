@@ -74,11 +74,14 @@
             $callsign  = substr($line, 31,  8);
             if (in_array($callsign, $callcmp) == true) continue;
 
+            /* 正常なログ列でなかった場合処理をパスする */
+            $timestamp = substr($line,  0, 19);
+            if ((substr($timestamp, 0, 4) > 2000) != true) continue;
+
             /* 過去に出現（表示レベル）していない場合比較配列に入れる */
             $callcmp[] = $callsign;
 
-            /* 新たに拡張子も含むコールサインを含めデータ取得 */
-            $timestamp = substr($line,  0, 19);
+            /* 他のデータを取得 */
             $suffix    = substr($line, 40,  4);
             $temp      = substr($line, 60,  1);
             if ($temp == 'A') $type = 'ZR';
