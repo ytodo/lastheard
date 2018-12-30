@@ -63,7 +63,13 @@
 ?>
 
 <table> <!-- ラストハードリスト--->
-    <tr><th>Time</th><th>Callsign</th><th>Sufix</th><th>Type</th><th>UR</th><th>Message</th></tr>
+    <tr><th style="width:195px;">Time</th>
+        <th style="width:95px;">Callsign</th>
+        <th style="width:60px;">Sufix</th>
+        <th style="width:45px;">Type</th>
+        <th style="width:95px;">UR</th>
+        <th style="width:230px;">Message</th>
+    </tr>
 <?php
     /* 読み込みデータの各行を一行ずつ変数に格納し各データに分解 */
     $callcmp = [];     /* 配列 */
