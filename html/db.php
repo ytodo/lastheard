@@ -88,12 +88,16 @@
             $callcmp[] = $callsign;
 
             /* 他のデータを取得 */
-            $suffix    = substr($line, 40,  4);
             $temp      = substr($line, 60,  1);
             if ($temp == 'A') $type = 'ZR';
             if ($temp == 'G') $type = 'GW';
             $ur        = substr($line, 68,  8);
             $message   = substr($line, 90, 20);
+            $suffix    = substr($line, 40,  4);
+            if ($suffix == " | r") {
+                $message = "Error! Suffix==NULL.";
+                $suffix  = "    ";
+            }
 
             /* 各データをテーブルに表示 */
             if ($timestamp != NULL) {
@@ -102,9 +106,13 @@
                       <td>'.$callsign.'</td>
                       <td>'.$suffix.'</td>
                       <td><center>'.$type.'</center></td>
-                      <td>'.$ur.'</td>
-                      <td>'.$message.'</td>
-                      </tr>';
+                      <td>'.$ur.'</td>';
+                if (substr($message, 0, 5) == "Error") {
+                      echo '<td style="color:red;">'.$message.'</td>';
+                } else {
+                      echo '<td>'.$message.'</td>';
+                }
+                      echo '</tr>';
             }
             $count++;
         }
