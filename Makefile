@@ -1,5 +1,6 @@
 ###################################################
 # Makefile for compiling recv for lastheard
+#                      Created by Yosh Todo/JE3HCZ
 ###################################################
 
 # Program Name and object files
