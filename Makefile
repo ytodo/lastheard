@@ -6,12 +6,13 @@
 # Program Name and object files
 PROGRAM	= lastheard
 OBJECTS = recv.o
+DEST    = /usr/local/bin
 
 # Redefine MACRO
-CC	= gcc
+CC  = gcc
 
 # Define extention of Suffix Rules
-.SUFFIXES	: .c .o
+.SUFFIXES   : .c .o
 
 # Rule of compiling program
 $(PROGRAM)	: $(OBJECTS)
@@ -28,4 +29,3 @@ clean	:
 
 # Dependency of Header Files
 $(OBJECTS)	: recv.h
-

@@ -24,7 +24,7 @@ int main(void)
 
         /* 待ち受けるIP とポート番号を設定 */
         addr.sin_family = AF_INET;
-        addr.sin_port = htons(50100);           /* 受信ポートxchage より */
+        addr.sin_port = htons(52000);           /* 受信ポートxchage より */
         addr.sin_addr.s_addr = INADDR_ANY;
 
         /* バインドする */
