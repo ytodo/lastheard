@@ -9,7 +9,7 @@ OBJECTS = recv.o
 DEST    = /usr/local/bin
 
 # Redefine MACRO
-CC  = gcc
+CC      = gcc
 
 # Define extention of Suffix Rules
 .SUFFIXES   : .c .o
