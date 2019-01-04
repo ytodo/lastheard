@@ -17,58 +17,85 @@
 int main(void)
 {
 	/* IPv4 UDP のソケットを作成*/
-        if((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-                perror("socket");
-                return (-1);
+    if((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("socket");
+        return (-1);
+    }
+
+    /* 待ち受けるIP とポート番号を設定 */
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(52000);           /* 受信ポートxchage より */
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    /* バインドする */
+    if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        perror("bind");
+        return (-1);
+    }
+
+    /* UDP パケットの捕捉と仕分け、再構成 */
+    while (1) {
+
+        /* 受信バッファの初期化 */
+        memset(recvbuf, 0, sizeof(recvbuf));
+
+        /* 受信パケット用ソケット */
+        if (recvfrom(sock, recvbuf, sizeof(recvbuf), 0, (struct sockaddr *)&from_addr, &sin_size) < 0) {
+            perror("recvfrom");
+            return (-1);
         }
 
-        /* 待ち受けるIP とポート番号を設定 */
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(52000);           /* 受信ポートxchage より */
-        addr.sin_addr.s_addr = INADDR_ANY;
-
-        /* バインドする */
-        if (bind(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-                perror("bind");
-                return (-1);
+       	/* データセグメントの3バイトを取得 */
+        for (i = 0; i < 3; i++) {
+	        sdata[i] = recvbuf[26 + i];
         }
 
-        /* UDP パケットの捕捉と仕分け、再構成 */
-        while (1) {
+       	/* sync packetか? */
+        if (memcmp(sdata, sync, 3) == 0) {
+       		memset(sdata, 0, sizeof(sdata));
+//	        continue;
+       	}
 
-                /* 受信バッファの初期化 */
-                memset(recvbuf, 0, sizeof(recvbuf));
+       	/* Last Flameか？ */
+       	if (memcmp(sdata, last, 3) == 0) {
+	        linecount();
+       		m_counter = 0;
+	        m_flag = 0;
+//       		continue;
+        }
 
-                /* 受信パケット用ソケット */
-                if (recvfrom(sock, recvbuf, sizeof(recvbuf), 0, (struct sockaddr *)&from_addr, &sin_size) < 0) {
-                        perror("recvfrom");
-                        return (-1);
-                }
-
-                /* 管理データL の値によりタスクを分ける */
-                switch (recvbuf[9]) {
+        /* 管理データL の値によりタスクを分ける */
+        switch (recvbuf[9]) {
 
 		/* 最初のフレーム */
 		case 0x30:
 
-			/* access time */
-			timer = time(NULL);
-			timeptr = localtime(&timer);
-			strftime(tmstr, N, "%Y/%m/%d %H:%M:%S", timeptr);
+            /* ミニヘッダ40～43のとき以外はm_flagは2になる */
+            if (m_flag < 2) {
 
-			/* access time によるダブり防止 */
-			if (strcmp(tmstr, tmstrpre) == 0) break;
-			strcpy(tmstrpre, tmstr);
+    			/* access time */
+	    		timer = time(NULL);
+		    	timeptr = localtime(&timer);
+			    strftime(tmstr, N, "%Y/%m/%d %H:%M:%S", timeptr);
 
-			/* ヘッダー情報表示サブへ */
-			header(recvbuf);
+    			/* access time によるダブり防止 */
+	    		if (strcmp(tmstr, tmstrpre) == 0) break;
+		    	strcpy(tmstrpre, tmstr);
+
+    			/* ヘッダー情報表示サブへ */
+	    		header(recvbuf);
+            }
 			break;
 
 		/* 第3 フレーム以降 */
 		case 0x13:
 
-			/* Slow Data 表示サブルーティン */
- 			slowdata(recvbuf);
+            /* ミニヘッダ40～43のとき以外はm_flagは2になる */
+            if (m_flag < 2) {
+
+                /* Slow Data 表示サブルーティン */
+ 			    slowdata(recvbuf);
+            }
 			break;
 
 		/* ラストフレーム */
@@ -76,16 +103,17 @@ int main(void)
 
 			/* Last flame */
 			m_counter = 0;
-			break;
+            m_flag = 0;
+   			break;
 
 		default:
 
 			break;
-                }
         }
+    }
 
-        /* ソケットのクローズ   */
-        close(sock);
+    /* ソケットのクローズ   */
+    close(sock);
 }
 
 
@@ -103,7 +131,6 @@ int main(void)
  **************************************************/
 int header(char *recvbuf)
 {
-
 	/* access time  */
 	sprintf(logline, "%s", tmstr);
 
@@ -162,29 +189,8 @@ int header(char *recvbuf)
  **************************************************/
 int slowdata(char *recvbuf)
 {
-	/* データセグメントの3バイトを取得 */
-	for (i = 0; i < 3; i++) {
-		sdata[i] = recvbuf[26 + i];
-	}
-
-	/* sync packetか? */
-	if (memcmp(sdata, sync, 3) == 0) {
-		memset(sdata, 0, sizeof(sdata));
-		return;
-	}
-
-	/* Last Flameか？ */
-	if (memcmp(sdata, last, 3) == 0) {
-//		printf("%s\n", logline);
-		write(logline);
-		linecount();
-		m_counter = 0;
-		m_flag = 0;
-		return;
-	}
-
 	/* データ・セグメントのスクランブルを解く */
-        for (i = 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
 		sdata[i] = (sdata[i] ^ scbl[i]);
 	}
 
@@ -194,7 +200,7 @@ int slowdata(char *recvbuf)
 		/* メッセージ20 バイトの先頭にタイトル */
 		if (sdata[0] == 0x40) strcat(logline, " Short MSG: ");
 
-	        /* ミニヘッダ以外の２バイト（16bits）を表示 */
+        /* ミニヘッダ以外の２バイト（16bits）を表示 */
 		line[0] = '\0';
 		sprintf(line, "%c%c", sdata[1], sdata[2]);
 		strcat(logline, line);
@@ -214,6 +220,7 @@ int slowdata(char *recvbuf)
 
 	/* メッセージの末尾又は合成パケット四つ分(カウント８）でクリア */
 	if (m_counter > 7) {
+		write(logline);
 		m_flag = 2;
 	}
 
