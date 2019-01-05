@@ -40,7 +40,7 @@
         if (ereg("PIC_POSx", $line)) $pic_posx = str_replace("\n", '', substr($line, 9));
         if (ereg("PIC_POSy", $line)) $pic_posy = str_replace("\n", '', substr($line, 9));
         if (ereg("REPEAT",   $line)) $repeat   = str_replace("\n", '', substr($line, 7));
-
+        if (ereg("BGCOLOR",  $line)) $bgcolor  = str_replace("\n", '', substr($line, 8));
     }
     fclose($fp);
 
@@ -59,10 +59,16 @@
     <title>D-STAR DASHBOARD</title>
     <link rel="stylesheet" href="css/db.css">
 </head>
-<body>
-<div class="wrapper"> <!-- 中央表示用ラップ -->
 
-<?php /* WEB ヘッダー */
+<?php
+/* <body> color の設定 */
+    $str = sprintf("<body style=\"background-color: %s;\">", $bgcolor);
+    echo $str;
+
+/* <div.wrapper> も同色に設定  == ヘッダー部== */
+    $str = sprintf("<div class=\"wrapper\" style=\"background-color: %s;\">", $bgcolor);
+    echo $str;
+
     if ((is_null($head_pic) != true) || (empty($hea_pic) != true)) {
         $str = sprintf("<div style=\"background: url('images/%s') %s %s %s;\">", $head_pic, $pic_posx, $pic_posy, $repeat);
         echo $str;
