@@ -45,57 +45,80 @@ int main(void)
             return (-1);
         }
 
-       	/* データセグメントの3バイトを取得 */
+
+
+        /*
+         * 各フレーム末尾３バイト（24bits ）のデータセグメントを処理する
+         */
         for (i = 0; i < 3; i++) {
 	        sdata[i] = recvbuf[26 + i];
         }
 
-       	/* sync packetか? */
-        if (memcmp(sdata, sync, 3) == 0) {
-       		memset(sdata, 0, sizeof(sdata));
-//	        continue;
-       	}
-
-       	/* Last Flameか？ */
-       	if (memcmp(sdata, last, 3) == 0) {
-	        linecount();
-       		m_counter = 0;
-	        m_flag = 0;
-//       		continue;
-        }
-
-        /* 管理データL の値によりタスクを分ける */
+        /*
+         * 管理データL の値によりタスクを分ける
+         * （0x30 はL の次から４８バイトのデータの意）
+         */
         switch (recvbuf[9]) {
 
-		/* 最初のフレーム */
+		/* 最初のフレーム（音声ヘッダ：スクランブル無し） */
 		case 0x30:
 
-            /* ミニヘッダ40～43のとき以外はm_flagは2になる */
-            if (m_flag < 2) {
+            /*
+             * 同一通話ID （PTTON からPTTOFF まで）で一度ログを出す
+             * 書き出し直後にflag を３にセットして判断
+             */
+            if (m_flag == 3) break;
 
-    			/* access time */
-	    		timer = time(NULL);
-		    	timeptr = localtime(&timer);
-			    strftime(tmstr, N, "%Y/%m/%d %H:%M:%S", timeptr);
+            /* access time */
+            timer = time(NULL);
+            timeptr = localtime(&timer);
+            strftime(tmstr, N, "%Y/%m/%d %H:%M:%S", timeptr);
 
-    			/* access time によるダブり防止 */
-	    		if (strcmp(tmstr, tmstrpre) == 0) break;
-		    	strcpy(tmstrpre, tmstr);
+            /* access time によるダブり防止 */
+            if (strcmp(tmstr, tmstrpre) == 0) break;
+            strcpy(tmstrpre, tmstr);
 
-    			/* ヘッダー情報表示サブへ */
-	    		header(recvbuf);
-            }
-			break;
+            /* ヘッダー情報表示サブへ */
+            header(recvbuf);
 
-		/* 第3 フレーム以降 */
+            break;
+
+		/* 第3 フレーム以降（データセグメント：スクランブル有り） */
 		case 0x13:
 
-            /* ミニヘッダ40～43のとき以外はm_flagは2になる */
-            if (m_flag < 2) {
-
-                /* Slow Data 表示サブルーティン */
- 			    slowdata(recvbuf);
+            /* sync packetか? */
+            if (memcmp(sdata, sync, 3) == 0) {
+                memset(sdata, 0, sizeof(sdata));
+                break;
             }
+
+            /* Last Flameか？ */
+            if (memcmp(sdata, last, 3) == 0) {
+                linecount();
+                m_counter = 0;
+                m_flag = 0;
+                break;
+            }
+
+            /*
+             * 同一通話ID （PTTON からPTTOFF まで）で一度ログを出す
+             * 書き出し直後にflag を３にセットして判断
+             */
+            if (m_flag == 3) break;
+
+            /* Slow Data 表示サブルーティン */
+            slowdata(recvbuf);
+
+            /* slowdata の構成が終了した時点でm_flag に２がセットされる */
+            if (m_flag == 2) {
+
+                /* 一行ログを出力する */
+                write(logline);
+
+                /* その時点でm_flag を３にセットしてLast Flame を待つ */
+                m_flag = 3;
+            }
+
 			break;
 
 		/* ラストフレーム */
@@ -108,7 +131,7 @@ int main(void)
 
 		default:
 
-			break;
+            break;
         }
     }
 
@@ -220,7 +243,8 @@ int slowdata(char *recvbuf)
 
 	/* メッセージの末尾又は合成パケット四つ分(カウント８）でクリア */
 	if (m_counter > 7) {
-		write(logline);
+
+        /* ログ一行の書き出しフラッグを立てる */
 		m_flag = 2;
 	}
 
