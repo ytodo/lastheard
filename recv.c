@@ -80,7 +80,6 @@ int main(void)
 
             /* ヘッダー情報表示サブへ */
             header(recvbuf);
-            m_flag = 3;
 
             break;
 
@@ -91,14 +90,14 @@ int main(void)
             if (memcmp(sdata, last, 3) == 0) {
                 linecount();
                 m_counter = 0;
-                m_flag = 3;
+                m_flag = 0;
                 break;
             }
 
             /* sync packetか? */
             if (memcmp(sdata, sync, 3) == 0) {
                 memset(sdata, 0, sizeof(sdata));
-                m_flag = 0;
+                if (m_flag != 3) m_flag = 0;
             }
 
             /*
