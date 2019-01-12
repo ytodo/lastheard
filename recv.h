@@ -73,7 +73,8 @@ char	line[32] = {'\0'};
 char	c[1] = {'\0'};
 int     i = 0;
 int     j = 0;
-int     m_flag = 0;
+int     m_flag    = 0;
+int     m_sync    = 0;
 int     m_counter = 0;
 
 /* 関数の宣言 */
