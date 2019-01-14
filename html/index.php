@@ -69,7 +69,7 @@
     $str = sprintf("<div class=\"wrapper\" style=\"background-color: %s;\">", $bgcolor);
     echo $str;
 
-    if ((is_null($head_pic) != true) || (empty($hea_pic) != true)) {
+    if ((is_null($head_pic) != true) || (empty($head_pic) != true)) {
         $str = sprintf("<div style=\"background: url('images/%s') %s %s %s;\">", $head_pic, $pic_posx, $pic_posy, $repeat);
         echo $str;
         $flag = 1;
@@ -114,25 +114,30 @@
             $ur        = substr($line, 68,  8);
             $message   = substr($line, 90, 20);
             $suffix    = substr($line, 40,  4);
+
+            /* もしsuffix欄がnullだったら（Noragateway対策） */
             if ($suffix == " | r") {
-                $message = "Error! Suffix==NULL.";
-                $suffix  = "    ";
+                $suffix  = "Null";
+                $ur      = substr($line, 64,  8);
+                $message = substr($line, 86, 20);
             }
 
             /* 各データをテーブルに表示 */
             if ($timestamp != NULL) {
                 echo '<tr>
                       <td>'.$timestamp.'</td>
-                      <td>'.$callsign.'</td>
-                      <td>'.$suffix.'</td>
-                      <td><center>'.$type.'</center></td>
-                      <td>'.$ur.'</td>';
-                if (substr($message, 0, 5) == "Error") {
-                      echo '<td style="color:red;">'.$message.'</td>';
+                      <td>'.$callsign.'</td>';
+
+                /* もしsuffix欄がnullだったら（Noragateway対策） */
+                if (substr($suffix, 0, 4) == "Null") {
+                    echo '<td style="color:red;">'.$suffix.'</td>';
                 } else {
-                      echo '<td>'.$message.'</td>';
+                    echo '<td>'.$suffix.'</td>';
                 }
-                      echo '</tr>';
+                echo '<td><center>'.$type.'</center></td>
+                      <td>'.$ur.'</td>
+                      <td>'.$message.'</td>
+                      </tr>';
             }
             $count++;
         }
