@@ -108,16 +108,19 @@
             $callcmp[] = $callsign;
 
             /* 他のデータを取得 */
+            $suffix    = substr($line, 40,  4);
             $temp      = substr($line, 60,  1);
             if ($temp == 'A') $type = 'ZR';
             if ($temp == 'G') $type = 'GW';
             $ur        = substr($line, 68,  8);
             $message   = substr($line, 90, 20);
-            $suffix    = substr($line, 40,  4);
 
             /* もしsuffix欄がnullだったら（Noragateway対策） */
             if ($suffix == " | r") {
                 $suffix  = "Null";
+                $temp    = substr($line, 56,  1);
+                if ($temp == 'A') $type = 'ZR';
+                if ($temp == 'G') $type = 'GW';
                 $ur      = substr($line, 64,  8);
                 $message = substr($line, 86, 20);
             }

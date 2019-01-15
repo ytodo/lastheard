@@ -45,13 +45,15 @@ int main(void)
             return (-1);
         }
 
-        /*
-         * 管理データL の値によりタスクを分ける
-         * （0x30 はL の次から４８バイトのデータの意）
-         */
+        /**************************************************
+         * インターネット側通信ヘッダ（status)の表示      *
+         *                                                *
+         * 音声系データの管理データL （L の後ろに続く     *
+         * データ長）から判断   0x30 （４８バイト）。     *
+         * インターネット側はスクランブルされない。       *
+         **************************************************/
         switch (recvbuf[9]) {
 
-		/* 最初のフレーム（音声ヘッダ：スクランブル無し） */
 		case 0x30:
 
             /*
@@ -64,13 +66,48 @@ int main(void)
             timer = time(NULL);
             timeptr = localtime(&timer);
             strftime(tmstr, N, "%Y/%m/%d %H:%M:%S", timeptr);
+            sprintf(logline, "%s", tmstr);
 
-            /* ヘッダー情報表示サブへ */
-            header(recvbuf);
+            /* My   */
+            strcat(logline, " D-STAR my: ");
+            line[0] = '\0';
+            for (j = 0; j < 8; ++j) {
+                sprintf(c, "%c", recvbuf[44 + j]);
+                strcat(line, c);
+            }
+            strcat(logline, line);
+            strcat(logline, "/");
+            line[0] = '\0';
+            for (j = 0; j < 4; ++j) {
+                sprintf(c, "%c", recvbuf[52 + j]);
+                if (c == '\0' ) strcpy(c, " ");
+                strcat(line, c);
+            }
+            strcat(logline, line);
+            strcat(logline, " |");
+
+            /* rpt1 */
+            strcat(logline, " rpt1: ");
+            line[0] = '\0';
+            for (j = 0; j < 8; ++j) {
+                sprintf(c, "%c", recvbuf[28 + j]);
+                strcat(line, c);
+            }
+            strcat(logline, line);
+
+            /* ur   */
+            strcat(logline, " | ur: ");
+            line[0] = '\0';
+            for (j = 0; j < 8; ++j) {
+                sprintf(c, "%c", recvbuf[36 + j]);
+                strcat(line, c);
+            }
+            strcat(logline, line);
+            strcat(logline, " |");
 
             break;
 
-		/* 第3 フレーム以降（データセグメント：スクランブル有り） */
+		/* ヘッダー部に続く19バイトのフレーム */
 		case 0x13:
 
             /* 各フレーム末尾３バイト（24bits ）のデータセグメントを処理する */
@@ -139,63 +176,6 @@ int main(void)
 /**************************************************
  * 関数の定義                                     *
  **************************************************/
-
-
-/**************************************************
- * インターネット側通信ヘッダ（status)の表示      *
- *                                                *
- * 音声系データの管理データL （L の後ろに続く     *
- * データ長）から判断   0x30 （４８バイト）。     *
- * インターネット側はスクランブルされない。       *
- **************************************************/
-int header(char *recvbuf)
-{
-    /* ログ用文字変数を一旦クリア */
-//    logline[0] = '\0';
-
-	/* access time  */
-	sprintf(logline, "%s", tmstr);
-
-	/* My   */
-	strcat(logline, " D-STAR my: ");
-	line[0] = '\0';
-	for (j = 0; j < 8; ++j) {
-		sprintf(c, "%c", recvbuf[44 + j]);
-		strcat(line, c);
-	}
-	strcat(logline, line);
-	strcat(logline, "/");
-	line[0] = '\0';
-	for (j = 0; j < 4; ++j) {
-		sprintf(c, "%c", recvbuf[52 + j]);
-		if (c == '\0' ) strcpy(c, " ");
-		strcat(line, c);
-	}
-	strcat(logline, line);
-	strcat(logline, " |");
-
-	/* rpt1 */
-	strcat(logline, " rpt1: ");
-	line[0] = '\0';
-	for (j = 0; j < 8; ++j) {
-		sprintf(c, "%c", recvbuf[28 + j]);
-		strcat(line, c);
-	}
-	strcat(logline, line);
-
-	/* ur   */
-	strcat(logline, " | ur: ");
-	line[0] = '\0';
-	for (j = 0; j < 8; ++j) {
-		sprintf(c, "%c", recvbuf[36 + j]);
-		strcat(line, c);
-	}
-	strcat(logline, line);
-	strcat(logline, " |");
-
-	return;
-}
-
 
 /**************************************************
  * データセグメント（Slow Data ）情報の構成と表示 *
