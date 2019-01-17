@@ -83,7 +83,7 @@
 </div>
 
 <table> <!-- ラストハードリスト--->
-    <tr><th style="width:195px;">Time</th>
+    <tr><th style="width:205px;">Time</th>
         <th style="width:95px;">Callsign</th>
         <th style="width:60px;">Sufix</th>
         <th style="width:45px;">Type</th>
