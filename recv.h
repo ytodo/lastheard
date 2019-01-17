@@ -78,7 +78,8 @@ int     m_sync    = 0;
 int     m_counter = 0;
 
 /* 関数の宣言 */
-int header(char *recvbuf);
 int slowdata(char *recvbuf);
+int write(char *logline);
+int linecount(void);
 
 #endif // __RECV_H__
