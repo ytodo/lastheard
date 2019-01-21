@@ -44,29 +44,30 @@
 #include <string.h>
 
 /* macros */
-#define N 256
+#define N 256           // 配列標準サイズ
+#define LOGMAX 500      // linecount
+#define LOGDEL 100      // linecount
 
 /* socket関連*/
 unsigned int sock;
 struct	sockaddr_in addr;
 socklen_t sin_size;
 struct	sockaddr_in from_addr;
-char	recvbuf[64];		/* 受信バッファ */
+char	recvbuf[64];    // 受信バッファ
 
 /* 日付表示関連 */
 time_t  timer;
 struct  tm *timeptr;
 char    tmstr[N] = {'\0'};
-char    tmstrpre[N] = {'\0'};		/* 時刻の同じ二重パケットを排除するため使用 */
 
 /* Voice ShortData関連 */
-char	sdata[3];			/* データセグメント */
-char	sync[] = { 0x55, 0x2d, 0x16 };	/* 同期データ 3bytes */
-char	last[] = { 0x55, 0x55, 0x55 };	/* last flame */
-char	scbl[] = { 0x70, 0x4f, 0x93 };	/* scranbleパターン */
-char	mesg[32];
+char	sdata[3] = {'\0'};			    // データセグメント
+char	sync[] = { 0x55, 0x2d, 0x16 };	// 同期データ 3bytes
+char	last[] = { 0x55, 0x55, 0x55 };	// last flame
+char	scbl[] = { 0x70, 0x4f, 0x93 };	// scranbleパターン
 
 /* その他 */
+FILE    *fp;
 char	*LOGFILE = "/var/log/lastheard.log";
 char	logline[N] = {'\0'};
 char	line[32] = {'\0'};
@@ -77,9 +78,15 @@ int     m_flag    = 0;
 int     m_sync    = 0;
 int     m_counter = 0;
 
+/* linecount関連 */
+int     count    = 0;
+char    buf[N] = {'\0'};
+char    logs[LOGMAX][N];
+
 /* 関数の宣言 */
-int slowdata(char *recvbuf);
-int write(char *logline);
+int header(void);
+int slowdata(void);
+int write(void);
 int linecount(void);
 
 #endif // __RECV_H__
