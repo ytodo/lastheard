@@ -86,7 +86,7 @@
 <table> <!-- 接続ユーザリスト--->
     <tr><th style="width:185px;">Time</th>
         <th style="width:95px;">Callsign</th>
-        <th style="width:65px;">Port No.</th></tr>
+        <th style="width:75px;">Port No.</th></tr>
 
 <?php
 
@@ -151,7 +151,7 @@
 </div>
 
 <table> <!-- ラストハードリスト--->
-    <tr><th style="width:195px;">Time</th>
+    <tr><th style="width:200px;">Time</th>
         <th style="width:95px;">Callsign</th>
         <th style="width:60px;">Sufix</th>
         <th style="width:45px;">Type</th>
