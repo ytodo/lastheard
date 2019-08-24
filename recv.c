@@ -36,6 +36,7 @@ int main(void)
     /* UDP パケットの捕捉と仕分け、再構成 */
     while (1) {
 
+
         /* 受信バッファの初期化 */
         memset(recvbuf, 0, sizeof(recvbuf));
 
@@ -76,10 +77,15 @@ int main(void)
 
             /* Last Flameか？ */
             if (memcmp(sdata, last, 3) == 0) {
-                linecount();
+//                linecount();
                 m_counter = 0;
                 m_flag = 0;
                 m_sync = 0;
+
+
+for (i=0;i<sizeof(recvbuf);i++) printf("%c", recvbuf[i]);
+printf("\n");
+
                 break;
             }
 
@@ -87,6 +93,11 @@ int main(void)
             if (memcmp(sdata, sync, 3) == 0) {
                 memset(sdata, 0, sizeof(sdata));
                 m_sync = 1;
+
+for (i=0;i<sizeof(recvbuf);i++) printf("%c", recvbuf[i]);
+printf("\n");
+
+
                 break;
             }
 

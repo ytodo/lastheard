@@ -29,8 +29,9 @@ C言語の部分は、ポートから取り込んだストリームを処理し�
 フォルダー内で make すれば lastheard がコンパイルされます。これを /usr/local/bin 等に置
 いてください。
 	
-PHPの部分は、lastheard.log から index.phpで指定行数を読み込んで、コールサインごと（拡張
-子も比較します）に最新の物をWEB表示します。
+PHPの部分は、multi_forward.log から接続状況を取得して［Remote Users］に表示します。また
+lastheard.log から指定行数を読み込んで、コールサインごと（拡張子も比較します）に最新の物を
+表示します。
 
 ・httpd を有効にして、ダウンロードしたhtmlフォルダの内容を､そのままの構成で/var/www/html
 　に移してください。
