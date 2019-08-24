@@ -86,7 +86,7 @@
 <table> <!-- 接続ユーザリスト--->
     <tr><th style="width:185px;">Time</th>
         <th style="width:95px;">Callsign</th>
-        <th style="width:85px;">Port No.</th></tr>
+        <th style="width:65px;">Port No.</th></tr>
 
 <?php
 
@@ -134,7 +134,7 @@
                 $timestamp = strtotime(str_replace("\n", '', substr($line, 4, 20)));
 
                 /* テーブルの一行を出力 */
-                echo "<tr><td>".date('Y/m/d H:i:s', $timestamp)."<td>".$callsign."</td><td>".$port."</td></tr>";
+                echo "<tr><td>".date('Y/m/d H:i:s', $timestamp)."<td>".$callsign."</td><td align=\"right\">".$port."</td></tr>";
             }
         }
 
