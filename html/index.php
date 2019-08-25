@@ -107,7 +107,7 @@
     }
 
 
-    $fp = popen("tail -n10 ".$multilogpath, 'r');
+    $fp = popen("tail -n20 ".$multilogpath, 'r');
 
     /* 全行比較し接続を表示 */
     while($line = fgets($fp)){
@@ -151,11 +151,11 @@
 </div>
 
 <table> <!-- ラストハードリスト--->
-    <tr><th style="width:200px;">Time</th>
-        <th style="width:95px;">Callsign</th>
+    <tr><th style="width:215px;">Time</th>
+        <th style="width:100px;">Callsign</th>
         <th style="width:60px;">Sufix</th>
         <th style="width:45px;">Type</th>
-        <th style="width:95px;">UR</th>
+        <th style="width:100px;">UR</th>
         <th style="width:230px;">Message</th>
     </tr>
 <?php
