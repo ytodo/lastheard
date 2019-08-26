@@ -103,6 +103,9 @@
     /* 全行比較し接続・接続解除を突き合わせ */
     while($line = fgets($fp)){
 
+        /* multi_forward が最終的にリスタートした所から読み込む */
+        if (ereg("Monitor Port 51000 open", $line)) unset($conuser);
+
         /* もし接続ログがあったら */
         if (ereg("Connect from",  $line)) {
 
