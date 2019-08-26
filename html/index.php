@@ -42,6 +42,7 @@
         if (ereg("PIC_POSy", $line)) $pic_posy = str_replace("\n", '', substr($line, 9));
         if (ereg("REPEAT",   $line)) $repeat   = str_replace("\n", '', substr($line, 7));
         if (ereg("BGCOLOR",  $line)) $bgcolor  = str_replace("\n", '', substr($line, 8));
+        if (ereg("COMMENT",  $line)) $comment  = str_replace("\n", '', substr($line, 8));
     }
     fclose($fp);
 
@@ -56,7 +57,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
 <head>
-    <title>D-STAR DASHBOARD</title>
+
+<?php
+    echo '<title>'.$rptcall.' D-STAR DASHBOARD</title>';
+?>
     <link rel="stylesheet" href="css/db.css">
 </head>
 
@@ -76,10 +80,10 @@
     } else {
         echo '<div>';
     }
-    echo '<h1>'.$rptname.'</h1>';
+    echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
 //    if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
 
-    echo '<h2>Connected Remote Users</h2>';
+    echo '<h2>Remote Users</h2>';
 ?>
 
 
@@ -91,25 +95,12 @@
 <?php
 
     /* 配列を宣言 */
-    $portcmp = [];
+    $conuser = [];
 
-    /* コマンドを実行し標準出力をファイルとしてオープン */
-    $fp = popen("tail -n10 ".$multilogpath, 'r');
+    /* ログファイルを後ろから指定行数読む */
+    $fp = popen("tail -n100 ".$multilogpath, 'r');
 
-    /* 全行より接続解除を取得 */
-    while($line = fgets($fp)){
-
-        /* 接続解除したポート番号を取得し比較用配列に入れる */
-        if (ereg("Disconnect", $line)) {
-            $port = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
-            $portcmp[] = $port;
-        }
-    }
-
-
-    $fp = popen("tail -n20 ".$multilogpath, 'r');
-
-    /* 全行比較し接続を表示 */
+    /* 全行比較し接続・接続解除を突き合わせ */
     while($line = fgets($fp)){
 
         /* もし接続ログがあったら */
@@ -118,35 +109,47 @@
             /* ポート番号を取得 */
             $port = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
 
-            /* 接続解除ポートと比較し解除されていなければ */
-            if (in_array($port, $portcmp) == false) {
+            /* すでにリスト中にポート番号が有った場合はスキップ */
+            if (in_array($port, $conuser) == true) continue;
 
-
-
-                /* コールサインを取得（空の場合 Unknown とする） */
-                if (substr($line, 38, 1) == " ") {
-                    $callsign = str_replace("\n", '', substr($line, 39, 8));
-                } else {
-                    $callsign = "unknown";
-                }
-
-                /* 日付/時間を指定の書式に変更 */
-                $timestamp = strtotime(str_replace("\n", '', substr($line, 4, 20)));
-
-                /* テーブルの一行を出力 */
-                echo "<tr><td>".date('Y/m/d H:i:s', $timestamp)."<td>".$callsign."</td><td align=\"right\">".$port."</td></tr>";
+            /* コールサインを取得（空の場合 Unknown とする） */
+            if (substr($line, 38, 1) == " ") {
+                $callsign = str_replace("\n", '', substr($line, 39, 8));
+            } else {
+                $callsign = "unknown";
             }
+
+            /* 日付/時間を指定の書式に変更 */
+            $timestamp = strtotime(str_replace("\n", '', substr($line, 4, 20)));
+
+            $conuser[] = [$timestamp, $callsign, $port];
         }
 
+        /* 接続解除したポート番号を取得 */
+        if (ereg("Disconnect", $line)) {
+            $delport = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
+
+            /* 配列内を検索し同ポートを持つエントリーを削除 */
+            foreach ($conuser as $i => $v) {
+                if ($v[2] == $delport) {
+                    unset($conuser[$i]);
+                }
+            }
+
+        }
     }
     fclose($fp);
 
+    /* 配列 $conuser を一行ずつ出力 (直近エントリーを上に） */
+    arsort($conuser);
+    foreach ($conuser as $i => $v) {
+        echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\">".$v[2]."</td></tr>";
+    }
 ?>
 </table>  <!-- 接続ユーザリストEnd--->
 
 <?php
-    /* ラストハードタイトルの表示*/
-    echo '<h2>Last Heard on '.$rptcall.'</h2>';
+    echo '<h2>Last Heard'.'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$comment.'</h2>';
 ?>
 </div>
 
@@ -156,7 +159,7 @@
         <th style="width:60px;">Sufix</th>
         <th style="width:45px;">Type</th>
         <th style="width:100px;">UR</th>
-        <th style="width:230px;">Message</th>
+        <th style="width:225px;">Message</th>
     </tr>
 <?php
 
