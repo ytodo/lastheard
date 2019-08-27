@@ -98,7 +98,7 @@
     $conuser = [];
 
     /* ログファイルを後ろから指定行数読む */
-    $fp = popen("tail -n100 ".$multilogpath, 'r');
+    $fp = fopen($multilogpath, 'r');
 
     /* 全行比較し接続・接続解除を突き合わせ */
     while($line = fgets($fp)){
