@@ -91,7 +91,6 @@
     <tr><th style="width:185px;">Time</th>
         <th style="width:95px;">Callsign</th>
         <th style="width:75px;">Port No.</th></tr>
-
 <?php
 
     /* 配列を宣言 */
@@ -116,8 +115,8 @@
             if (in_array($port, $conuser) == true) continue;
 
             /* コールサインを取得（空の場合 Unknown とする） */
-            if (substr($line, 38, 1) == " ") {
-                $callsign = str_replace("\n", '', substr($line, 39, 8));
+            if (substr($line, 38, 8) != " ") {
+                $callsign = str_replace("\n", '', substr($line, 38, 8));
             } else {
                 $callsign = "unknown";
             }

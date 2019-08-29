@@ -36,8 +36,8 @@ lastheard.log から指定行数を読み込んで、コールサインごと（
 ・httpd を有効にして、ダウンロードしたhtmlフォルダの内容を､そのままの構成で/var/www/html
 　に移してください。
 
-・/var/www/html/conf/db.confでリピータの名前（漢字かな使用可）､Last Heard onに続くコール
-　サイン（その後ろに続けて文字を入れても読みます）を入力します。　
+・/var/www/html/conf/db.confでリピータの名前（漢字かな使用可：Shift_JIS保存必要）､Last Heard 横に続く
+　コメントやリピータ名などを入力します。　
 
 ・また、WEBに表示する行数はデフォルト10行ですが、変更可能です。
 
