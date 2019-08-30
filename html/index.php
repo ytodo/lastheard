@@ -110,9 +110,12 @@
 
             /* ポート番号を取得 */
             $port = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
+            $portchk = $port;
 
             /* すでにリスト中にポート番号が有った場合はスキップ */
-            if (in_array($port, $conuser) == true) continue;
+            foreach ($conuser as $v) {
+                if ($v[2] == $port) continue 2;  // foreachの2階層上（while）に対してスキップ
+            }
 
             /* コールサインを取得（空の場合 Unknown とする） */
             if (substr($line, 38, 8) != " ") {
@@ -124,7 +127,12 @@
             /* 日付/時間を指定の書式に変更 */
             $timestamp = strtotime(str_replace("\n", '', substr($line, 4, 20)));
 
+            foreach ($conuser as $i => $v) {
+                if ($v[2] == $port) continue;
+            }
+
             $conuser[] = [$timestamp, $callsign, $port];
+
         }
 
         /* 接続解除したポート番号を取得 */
