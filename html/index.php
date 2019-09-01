@@ -127,10 +127,7 @@
             /* 日付/時間を指定の書式に変更 */
             $timestamp = strtotime(str_replace("\n", '', substr($line, 4, 20)));
 
-            foreach ($conuser as $i => $v) {
-                if ($v[2] == $port) continue;
-            }
-
+            /* 日付/時間、コールサイン、ポートを配列に格納 */
             $conuser[] = [$timestamp, $callsign, $port];
 
         }

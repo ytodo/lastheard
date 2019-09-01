@@ -45,8 +45,8 @@
 
 /* macros */
 #define N 256           // 配列標準サイズ
-#define LOGMAX 500      // linecount
-#define LOGDEL 100      // linecount
+#define LOGMAX 2000      // linecount
+#define LOGDEL 1000      // linecount
 
 /* socket関連*/
 unsigned int sock;
