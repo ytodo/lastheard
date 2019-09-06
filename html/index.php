@@ -28,6 +28,7 @@
     $logpath = '/var/log/lastheard.log';
     $cfgpath = './conf/db.conf';
     $multilogpath = '/var/log/multi_forward.log';
+    $xchangelogpath = '/var/log/xchange.log';
 
     /* 設定ファイルから値を読み込む */
     $fp = fopen($cfgpath, 'r');
@@ -81,6 +82,10 @@
         echo '<div>';
     }
     echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
+
+
+
+
 //    if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
 
     echo '<h2>Remote Users</h2>';
@@ -103,7 +108,10 @@
     while($line = fgets($fp)){
 
         /* multi_forward が最終的にリスタートした所から読み込む */
-        if (ereg("Monitor Port 51000 open", $line)) unset($conuser);
+        if (ereg("multi_forward", $line)) {
+            unset($conuser);
+            $multi_ver = str_replace("\n", '', substr($line, strpos($line, 'multi_forward'), 20));
+        }
 
         /* もし接続ログがあったら */
         if (ereg("Connect from",  $line)) {
@@ -152,7 +160,24 @@
     foreach ($conuser as $i => $v) {
         echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\">".$v[2]."</td></tr>";
     }
+
+    /* xchange のログからバージョン情報を取得 */
+    $fp = fopen($xchangelogpath, 'r');
+    while($line = fgets($fp)){
+
+        /* xchage が最終的にリスタートした所から読み込む */
+        if (ereg("ID-RP2C & dsgwd", $line)) {
+            $xchange_ver = str_replace("\n", '', substr($line, strpos($line, 'dsgwd') + 6, 6));
+        }
+    }
+    fclose($fp);
+
+    /* バージョン情報を表示 */
+    echo '<tr><td colspan=3 class="footer">
+        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8081">xchange '.$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8082">'.$multi_ver.'</td></tr>';
 ?>
+
 </table>  <!-- 接続ユーザリストEnd--->
 
 <?php
