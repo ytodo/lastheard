@@ -28,7 +28,6 @@
     $logpath = '/var/log/lastheard.log';
     $cfgpath = './conf/db.conf';
     $multilogpath = '/var/log/multi_forward.log';
-    $xchangelogpath = '/var/log/xchange.log';
 
     /* 設定ファイルから値を読み込む */
     $fp = fopen($cfgpath, 'r');
@@ -110,7 +109,7 @@
         /* multi_forward が最終的にリスタートした所から読み込む */
         if (ereg("multi_forward", $line)) {
             unset($conuser);
-            $multi_ver = str_replace("\n", '', substr($line, strpos($line, 'multi_forward'), 20));
+//            $multi_ver = str_replace("\n", '', substr($line, strpos($line, 'multi_forward'), 20));
         }
 
         /* もし接続ログがあったら */
@@ -161,21 +160,21 @@
         echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\">".$v[2]."</td></tr>";
     }
 
-    /* xchange のログからバージョン情報を取得 */
-    $fp = fopen($xchangelogpath, 'r');
-    while($line = fgets($fp)){
+    /* xchange のバージョン情報を取得 */
+    $fp = popen("rpm -q xchange", 'r');
+        $line = fgets($fp);
+        $xchange_ver = str_replace("\n", '', substr($line, 0, 15));
+    pclose($fp);
 
-        /* xchage が最終的にリスタートした所から読み込む */
-        if (ereg("ID-RP2C & dsgwd", $line)) {
-            $xchange_ver = str_replace("\n", '', substr($line, strpos($line, 'dsgwd') + 6, 6));
-        }
-    }
-    fclose($fp);
+    /* multi_forward のバージョン情報を取得 */
+    $fp = popen("rpm -q multi_forward", 'r');
+        $line = fgets($fp);
+        $multi_ver   = str_replace("\n", '', substr($line, 0,21));
 
     /* バージョン情報を表示 */
     echo '<tr><td colspan=3 class="footer">
-        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8081">xchange '.$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8082">'.$multi_ver.'</td></tr>';
+        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8081" target="_blank">'.$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8082" target="_blank">'.$multi_ver.'</td></tr>';
 ?>
 
 </table>  <!-- 接続ユーザリストEnd--->
@@ -259,9 +258,9 @@
     <tr><td colspan=6 class="footer"></td></tr>
 </table> <!-- ラストハードリストend --->
 
-<span class="footer"> <!-- フッター -->
-    &nbsp;&nbsp;D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA
-</span>
+<div class="footer"> <!-- フッター -->
+    D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA
+</div>
 
 </div>
 </body>
