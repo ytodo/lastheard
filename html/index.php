@@ -24,6 +24,8 @@
     /* 無線機器のカナ表示を有効にするためシフトJIS に設定 */
     header('Content-type:text/html; charset=Shift_JIS');
 
+    date_default_timezone_set('Asia/Tokyo');
+
     /* 対象のファイルパス */
     $logpath = '/var/log/lastheard.log';
     $cfgpath = './conf/db.conf';
@@ -82,9 +84,6 @@
     }
     echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
 
-
-
-
 //    if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
 
     echo '<h2>Remote Users</h2>';
@@ -97,9 +96,6 @@
         <th style="width:75px;">Port No.</th></tr>
 <?php
 
-    /* 配列を宣言 */
-    $conuser = [];
-
     /* ログファイルを後ろから指定行数読む */
     $fp = fopen($multilogpath, 'r');
 
@@ -108,8 +104,7 @@
 
         /* multi_forward が最終的にリスタートした所から読み込む */
         if (ereg("multi_forward", $line)) {
-            unset($conuser);
-//            $multi_ver = str_replace("\n", '', substr($line, strpos($line, 'multi_forward'), 20));
+            $conuser = [];
         }
 
         /* もし接続ログがあったら */
@@ -132,7 +127,8 @@
             }
 
             /* 日付/時間を指定の書式に変更 */
-            $timestamp = strtotime(str_replace("\n", '', substr($line, 4, 20)));
+            $logtime = substr($line, 0, 24);
+            $timestamp = strtotime($logtime);
 
             /* 日付/時間、コールサイン、ポートを配列に格納 */
             $conuser[] = [$timestamp, $callsign, $port];
@@ -201,6 +197,7 @@
 
     /* 読み込みデータの各行を一行ずつ変数に格納し各データに分解 */
     $callcmp = [];     /* 配列 */
+    $count = 0;
     foreach ($tmp as $line) {
         if ($count < $lines) {
 
