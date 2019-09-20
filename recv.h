@@ -44,9 +44,9 @@
 #include <string.h>
 
 /* macros */
-#define N 256           // 配列標準サイズ
-#define LOGMAX 2000      // linecount
-#define LOGDEL 1000      // linecount
+#define N       256      // 配列標準サイズ
+#define LOGMAX  2000     // linecount
+#define LOGDEL  1000     // linecount
 
 /* socket関連*/
 unsigned int sock;
@@ -78,15 +78,10 @@ int     m_flag    = 0;
 int     m_sync    = 0;
 int     m_counter = 0;
 
-/* linecount関連 */
-int     count    = 0;
-char    buf[N] = {'\0'};
-char    logs[LOGMAX][N];
-
 /* 関数の宣言 */
 int header(void);
 int slowdata(void);
 int write(void);
-int linecount(void);
+int linecount();
 
 #endif // __RECV_H__

@@ -1,4 +1,3 @@
-
 /**************************************************
  *  Dashboard for D-STAR Repeater Gateway         *
  *      lastheard version 1.0                     *
@@ -78,14 +77,10 @@ int main(void)
 
             /* Last Flameか？ */
             if (memcmp(sdata, last, 3) == 0) {
-//                linecount();
+                linecount();
                 m_counter = 0;
                 m_flag = 0;
                 m_sync = 0;
-
-
-for (i=0;i<sizeof(recvbuf);i++) printf("%c", recvbuf[i]);
-printf("\n");
 
                 break;
             }
@@ -94,10 +89,6 @@ printf("\n");
             if (memcmp(sdata, sync, 3) == 0) {
                 memset(sdata, 0, sizeof(sdata));
                 m_sync = 1;
-
-for (i=0;i<sizeof(recvbuf);i++) printf("%c", recvbuf[i]);
-printf("\n");
-
 
                 break;
             }
@@ -292,11 +283,14 @@ int write(void)
  * 規定を越えた行数分を古いエントリーから省いて   *
  * 再度上書きする。                               *
  **************************************************/
-int linecount(void)
+int linecount()
 {
-    for (i = 0; i < LOGMAX; i++) {
-        logs[i][0] = '\0';
-    }
+
+    int     count       = 0;
+    int     i           = 0;
+    char    buf[N]      = {'\0'};
+    char    logs[LOGMAX + 1000][N]   = {'\0'};
+
 
 	/* ログファイルを読み取りでオープン */
 	if ((fp = fopen(LOGFILE, "r")) == NULL) {
@@ -305,10 +299,10 @@ int linecount(void)
 	}
 
 	/* 各行を2次元配列に入れる */
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
+	while ((fgets(buf, sizeof(buf), fp)) != NULL) {
 		sprintf(&logs[count][0], "%s", buf);
 		count++;
- 	}
+	}
 
 	/* ファイルを閉じる */
 	fclose(fp);
@@ -322,14 +316,15 @@ int linecount(void)
 			return (-1);
 		}
 
-		/* */
+		/* 配列入れたデータを削除件数省いて書き出す */
 		for (i = 0; i < (count - LOGDEL); i++) {
 			fprintf(fp, "%s", &logs[i + LOGDEL][0]);
 		}
+
+    	/* ファイルを閉じる */
 	    fclose(fp);
 	}
 
-	/* ファイルを閉じる */
 
 	return (0);
 }
