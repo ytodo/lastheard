@@ -21,6 +21,10 @@
  *
  */
 
+//==========================================================
+//  環境設定
+//==========================================================
+
     /* 無線機器のカナ表示を有効にするためシフトJIS に設定 */
     header('Content-type:text/html; charset=Shift_JIS');
 
@@ -53,12 +57,17 @@
 
     header("Refresh:$sec; url=index.php");    // index.php
 //    header("Refresh:$sec; url=test.php");       // test.php
-
 ?>
 
+
+//==========================================================
+//  表示用環境設定（db.confからの設定を反映）
+//==========================================================
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
+<html>
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 
 <?php
     echo '<title>'.$rptcall.' D-STAR DASHBOARD</title>';
@@ -83,12 +92,14 @@
         echo '<div>';
     }
     echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
-
 //    if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
 
+
+//==========================================================
+//  接続ユーザの表示
+//==========================================================
     echo '<h2>Remote Users</h2>';
 ?>
-
 
 <table> <!-- 接続ユーザリスト--->
     <tr><th style="width:185px;">Time</th>
@@ -96,7 +107,49 @@
         <th style="width:75px;">Port No.</th></tr>
 <?php
 
-    /* ログファイルを後ろから指定行数読む */
+
+    //------------------------------------------------------
+    //  未登録コールサインの抽出
+    //------------------------------------------------------
+    /* ログの最後から10行読み込む */
+    $fp = popen("tail -n 10 " . $multilogpath, 'r');
+
+    /* 一旦表示用配列から未登録をすべて消す */
+    foreach ($conuser as $i => $v) {
+        if ($v[2] == "Not registed") {
+            unset($conuser[$i]);
+        }
+    }
+
+    /* 10行比較し新たに未登録を検出 */
+    while($line = fgets($fp)){
+
+        /* 未登録コールサインが有ったら */
+        if (ereg("not regist", $line)) {
+            $callsign = str_replace("\n", '', substr($line, 55, 8));
+
+            /* コールサインが空白の場合パスする */
+            if (strncmp($callsign, "  ", 2) == 0 ) continue;
+
+            /* 二重表示を防止する */
+            foreach ($conuser as $v) {
+                if ($v[1] == $callsign) continue 2;
+            }
+
+            /* 日付/時間を指定の書式に変更 */
+            $logtime = substr($line, 0, 24);
+            $timestamp = strtotime($logtime);
+
+            /* 日付/時間、コールサイン、ポートを配列に格納 */
+            $conuser[] = [$timestamp, $callsign, "Not registed"];
+        }
+    }
+    pclose($fp);
+
+    //----------------------------------------------------------
+    //  全接続ユーザの抽出
+    //----------------------------------------------------------
+    /* ログファイルを開く */
     $fp = fopen($multilogpath, 'r');
 
     /* 全行比較し接続・接続解除を突き合わせ */
@@ -135,6 +188,9 @@
 
         }
 
+    //----------------------------------------------------------
+    //  未登録を含む全ての接続解除コールサインを削除
+    //----------------------------------------------------------
         /* 接続解除したポート番号を取得 */
         if (ereg("Disconnect", $line)) {
             $delport = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
@@ -145,15 +201,18 @@
                     unset($conuser[$i]);
                 }
             }
-
         }
     }
     fclose($fp);
 
+
+    //----------------------------------------------------------
+    //  現在接続中のユーザリストを出力
+    //----------------------------------------------------------
     /* 配列 $conuser を一行ずつ出力 (直近エントリーを上に） */
     arsort($conuser);
     foreach ($conuser as $i => $v) {
-        echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\">".$v[2]."</td></tr>";
+        echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\" width=\"100\">".$v[2]."</td></tr>";
     }
 
     /* xchange のバージョン情報を取得 */
@@ -174,6 +233,15 @@
 ?>
 
 </table>  <!-- 接続ユーザリストEnd--->
+
+<!--
+<b><span style="color:yellow;">"Multi Forward" is out of service >>></span> <a href="https://blog.goo.ne.jp/jarl_lab2" target="_blank" style="color:yellow;text-decoration:none;" >D-STAR NEWS</a></b>
+-->
+
+
+//==========================================================
+//  ラストハードの表示
+//==========================================================
 
 <?php
     echo '<h2>Last Heard'.'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$comment.'</h2>';
