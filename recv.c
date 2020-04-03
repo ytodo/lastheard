@@ -228,7 +228,7 @@ int slowdata(void)
 		strcat(logline, line);
 		m_counter++;
 		m_flag = 1;
-		return;
+		return 0;
 	}
 
 	/* ミニヘッダを含まないブロック３バイト（24bits ）を接続 */
@@ -247,7 +247,7 @@ int slowdata(void)
 		m_flag = 2;
 	}
 
-	return;
+	return 0;
 }
 
 

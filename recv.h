@@ -79,9 +79,9 @@ int     m_sync    = 0;
 int     m_counter = 0;
 
 /* 関数の宣言 */
-int header(void);
-int slowdata(void);
-int write(void);
+int header();
+int slowdata();
+int write();
 int linecount();
 
 #endif // __RECV_H__
