@@ -193,7 +193,10 @@
     //----------------------------------------------------------
         /* 接続解除したポート番号を取得 */
         if (ereg("Disconnect", $line)) {
-            $delport = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
+
+	    /* (timeout)の括弧を省いたfrom以後の文字列にする */
+	    $subline = substr($line, strpos($line, 'from'));
+            $delport = str_replace("\n", '', substr($subline, strpos($subline, '(') + 1, -2));
 
             /* 配列内を検索し同ポートを持つエントリーを削除 */
             foreach ($conuser as $i => $v) {
@@ -228,8 +231,8 @@
 
     /* バージョン情報を表示 */
     echo '<tr><td colspan=3 class="footer">
-        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8081" target="_blank">'.$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-        <a class="footer" href="http://jl3zbs.gw.ircddb.net:8082" target="_blank">'.$multi_ver.'</td></tr>';
+        <a class="footer" href="http://jl3zbs-a.ddns.net:8081" target="_blank">'.$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a class="footer" href="http://jl3zbs-a.ddns.net:8082" target="_blank">'.$multi_ver.'</td></tr>';
 ?>
 
 </table>  <!-- 接続ユーザリストEnd--->
