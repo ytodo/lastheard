@@ -243,31 +243,55 @@
 		echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\" width=\"100\">".$v[2]."</td></tr>";
 	}
 
-	/* xchange のバージョン情報を取得 */
-	$fp = popen("apt-cache madison rpi-xchange", 'r');		// PiOSの場合
-// 	$fp = popen("rpm -q xchange", 'r');				// CentOSの場合
+	/* os-releaseを読込みOSを判断 */
+	$fp = popen("cat /etc/os-release", 'r');
 	$line = fgets($fp);
-	$xchange_ver = str_replace("\n", '', substr($line, 19, 5));	// PiOS
-//	$xchange_ver = str_replace("\n", '', substr($line, 0, 15));	// CentOS
+	if (preg_match("/Raspbian/". $line)) $os_name = "Raspbian";
 	pclose($fp);
 
-	/* multi_forward のバージョン情報を取得 */
-	$fp = popen("apt-cache madison rpi-multi-forward", 'r');	// PiOS
-//	$fp = popen("rpm -q multi_forward", 'r');			// CentOS
-	$line = fgets($fp);
-	$multi_ver = str_replace("\n", '', substr($line, 25, 5));	// PiOS
-//	$multi_ver = str_replace("\n", '', substr($line, 0, 21));	// CentOS
-	pclose($fp);
+	/* PiOSの場合 */
+	if ($os_name == "Raspbian")
+	{
+		/* xchange のバージョン情報を取得 */
+		$fp = popen("apt-cache madison rpi-xchange", 'r');		// PiOSの場合
+		$line = fgets($fp);
+		$xchange_ver = str_replace("\n", '', substr($line, 19, 5));	// PiOS
+		pclose($fp);
 
-	/* dsgwd のバージョン情報を取得 */
-	$fp = popen("apt-cache madison rpi-dsgwd", 'r');
-	$line = fgets($fp);
-	$dsgwd_ver = str_replace("\n", '', substr($line, 18, 5));
-	pclose($fp);
+		/* multi_forward のバージョン情報を取得 */
+		$fp = popen("apt-cache madison rpi-multi-forward", 'r');	// PiOS
+		$line = fgets($fp);
+		$multi_ver = str_replace("\n", '', substr($line, 25, 5));	// PiOS
+		pclose($fp);
+
+		/* dsgwd のバージョン情報を取得 */
+		$fp = popen("apt-cache madison rpi-dsgwd", 'r');
+		$line = fgets($fp);
+		$dsgwd_ver = str_replace("\n", '', substr($line, 18, 5));
+		pclose($fp);
+	}
+	else
+	/* CentOSの場合 */
+	{
+		/* xchange のバージョン情報を取得 */
+	 	$fp = popen("rpm -q xchange", 'r');				// CentOSの場合
+		$line = fgets($fp);
+		$xchange_ver = str_replace("\n", '', substr($line, 0, 15));	// CentOS
+		pclose($fp);
+
+		/* multi_forward のバージョン情報を取得 */
+		$fp = popen("rpm -q multi_forward", 'r');			// CentOS
+		$line = fgets($fp);
+		$multi_ver = str_replace("\n", '', substr($line, 0, 21));	// CentOS
+		pclose($fp);
+	}
 
 	/* バージョン情報を表示 */
 	echo '<tr><td colspan=3 class="footer">
-		<a class="footer" href="http://202.171.147.58:20200" target="_blank">'."dsgwd v".$dsgwd_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		if ($os_name == "Raspbian")
+		{
+			<a class="footer" href="http://202.171.147.58:20200" target="_blank">'."dsgwd v".$dsgwd_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		}
 		<a class="footer" href="http://202.171.147.58:20201" target="_blank">'."xchange v".$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 		<a class="footer" href="http://202.171.147.58:20202" target="_blank">'."multi_forward v".$multi_ver.'</td></tr>';
 ?>
