@@ -269,6 +269,23 @@
 		$line = fgets($fp);
 		$dsgwd_ver = str_replace("\n", '', substr($line, 18, 5));
 		pclose($fp);
+
+		/* dsgwd のバージョン情報を取得 */
+                $fp = popen("apt-cache madison rpi-dsgwd", 'r');
+                $line = fgets($fp);
+                $dsgwd_ver = str_replace("\n", '', substr($line, 18, 5));
+                pclose($fp);
+
+                /* decho のバージョン除法を取得 */
+                $fp = popen("apt-cache madison rpi-decho", 'r');
+                $line = fgets($fp);
+                $echo_ver = str_replace("\n", '', substr($line, 18, 5));
+
+                /* d-prs のバージョン除法を取得 */
+                $fp = popen("apt-cache madison rpi-dprs", 'r');
+                $line = fgets($fp);
+                $dprs_ver = str_replace("\n", '', substr($line, 18, 5));
+
 	}
 	else
 	/* CentOSの場合 */
@@ -286,16 +303,9 @@
 		pclose($fp);
 	}
 
-	/* バージョン情報を表示 */
-	echo '<tr><td colspan=3 class="footer">';
-	if ($os_name == "Raspbian")
-	{
-		echo '<a class="footer" href="http://202.171.147.58:20200" target="_blank">'."dsgwd v".$dsgwd_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-	}
-	echo '<a class="footer" href="http://202.171.147.58:20201" target="_blank">'."xchange v".$xchange_ver.'</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-	echo '<a class="footer" href="http://202.171.147.58:20202" target="_blank">'."multi_forward v".$multi_ver.'</td></tr>';
+	/* 表の下部太罫線 */
+	echo '<tr><td colspan=3 class="footer"></td></tr>';
 ?>
-
 </table>  <!-- 接続ユーザリストEnd--->
 
 <!--
@@ -401,23 +411,28 @@
 
 
 <div class="footer"> <!-- フッター -->
-    <center>
+	<center>
 	<span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA</span>
 	<br><br>
-        <span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS 64bit</b></span><BR>
-        <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br><br>
+	<span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS 64bit</b></span><BR>
+	<span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br><br>
+        <span style="color:white;font-size:16pt;">Version of Applications</span><br>
+        <hr size="0" width="30%" color="#333399">
 
 <?php
-        /* バージョン情報を表示 */
-        if ($os_name == "Debian")
-        {
-                echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
-        }
-        echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
-        echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
-        echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20204" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
+	/* バージョン情報を表示 */
+	if ($os_name == "Debian")
+	{
+		echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
+	}
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20204" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
 ?>
-    </center>
+
+	<hr size="0" width="30%" color="#333399">
+	</center>
 </div>
 
 </div>
