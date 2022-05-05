@@ -401,7 +401,23 @@
 
 
 <div class="footer"> <!-- フッター -->
-    <center><span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA</span></center>
+    <center>
+	<span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA</span>
+	<br><br>
+        <span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS 64bit</b></span><BR>
+        <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br><br>
+
+<?php
+        /* バージョン情報を表示 */
+        if ($os_name == "Debian")
+        {
+                echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
+        }
+        echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20204" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
+?>
+    </center>
 </div>
 
 </div>
