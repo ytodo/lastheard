@@ -393,12 +393,12 @@
                 $dstatus_ver = str_replace("\n", '', substr($line, 19, 5));
                 pclose($fp);
 
-                /* decho のバージョン除法を取得 */
+                /* decho のバージョン情報を取得 */
                 $fp = popen("apt-cache madison rpi-decho", 'r');
                 $line = fgets($fp);
                 $echo_ver = str_replace("\n", '', substr($line, 18, 5));
 
-                /* d-prs のバージョン除法を取得 */
+                /* d-prs のバージョン情報を取得 */
                 $fp = popen("apt-cache madison rpi-dprs", 'r');
                 $line = fgets($fp);
                 $dprs_ver = str_replace("\n", '', substr($line, 18, 5));
