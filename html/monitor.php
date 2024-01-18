@@ -425,7 +425,7 @@
 	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
 	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
 	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a></br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a><br>';
 	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20205" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
 ?>
 

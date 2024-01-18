@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2018 by Yosh Todo JE3HCZ
+ *  Copyright (C) 2018- by Yosh Todo JE3HCZ
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -388,9 +388,9 @@
                 pclose($fp);
 
                 /* dstatus のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-dsstatus", 'r');
+                $fp = popen("apt-cache madison rpi-dstatus", 'r');
                 $line = fgets($fp);
-                $dstatus_ver = str_replace("\n", '', substr($line, 18, 5));
+                $dstatus_ver = str_replace("\n", '', substr($line, 19, 5));
                 pclose($fp);
 
                 /* decho のバージョン除法を取得 */
@@ -421,12 +421,14 @@
         }
 
 	/* バージョン情報を表示 */
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20205" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
+
+	// http://202.171.147.58の部分はご自身のサーバーのアドレスに変更してください。
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20205" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
 ?>
 
 	<hr size="0" width="30%" color="#333399">
