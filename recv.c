@@ -1,14 +1,14 @@
 //////////////////////////////////////////////////////
-//													//
-//  Dashboard for D-STAR Repeater Gateway(RpiGW)	//
-//      lastheard version 2.0						//
-//      2018.12.17 - 2024.01.17						//
-//													//
-//  rpi-xchange が搭載されているリピータの			//
-//  ラストハードを表示する							//
-//													//
-//                    Created by Yosh Todo/JE3HCZ	//
-//													//
+//
+//  Dashboard for D-STAR Repeater Gateway(RpiGW)
+//      lastheard version 2.0.0
+//      2018.12.17 - 2024.01.17
+//
+//  rpi-xchange が搭載されているリピータの
+//  ラストハードを表示する
+//
+//                    Created by Yosh Todo/JE3HCZ
+//
 //////////////////////////////////////////////////////
 
 #include "recv.h"
