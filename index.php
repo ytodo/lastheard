@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.0.1";
+$version = "v.2.0.2";
 
 //==========================================================
 //  環境設定
@@ -310,15 +310,24 @@ $version = "v.2.0.1";
 
 
 
-<div class="footer"> <!-- フッター -->
-	<center>
-	<span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. <br>
-		<b>Last Heard <?php echo $version ?></b> applications are created by Yosh Todo/JE3HCZ <b>CC-BY-NC-SA</b></span>
-	<br><br>
-	<span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS Bookworm 64bit</b></span><BR>
-	<span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br><br>
-        <span style="color:white;font-size:16pt;">Version of Applications</span><br>
-        <hr size="0" width="30%" color="#333399">
+<!-- フッター この部分はCC-BY-NC-SAに準じて消さないでください。------------------------------------------------------->
+<div class="footer">
+    <center>
+    <span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. <br>
+        <b>Last Heard <?php echo $version ?></b> applications are created by Yosh Todo/JE3HCZ <b>CC-BY-NC-SA</b></span>
+<!-- ここまで Creative Commons BY-NC-SA ------------------------------------------------------------------------------>
+    <br><br>
+
+
+
+<!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
+<!--
+    <span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS Bookworm 64bit</b></span><BR>
+    <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span>
+    <br><br>
+-->
+
+
 
 <?php
 	// os-releaseを読込みOSを判断
