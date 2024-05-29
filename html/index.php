@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright (C) 2018- by Yosh Todo JE3HCZ
+ *  Copyright (C) 2018 by Yosh Todo JE3HCZ
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,17 +25,19 @@
 //  環境設定
 //==========================================================
 
-	/* 無線機器のカナ表示を有効にするためシフトJIS に設定 */
+	// 無線機器のカナ表示を有効にするためシフトJIS に設定
 	header('Content-type:text/html; charset=Shift_JIS');
 
+	// 規定値でタイムゾーンを設定
 	date_default_timezone_set('Asia/Tokyo');
 
-	/* 対象のファイルパス */
+	// 対象のファイルパス
 	$logpath = '/var/log/lastheard.log';
 	$cfgpath = './conf/db.conf';
-	$multilogpath = '/var/log/rpi-multi_forward.log';
+	$multilogpath = '/var/log/rpi-multi_forward.log';	// Raspberry Pi
+	//$multilogpath = '/var/log/multi_forward.log';		// AlmaLinux
 
-	/* 設定ファイルから値を読み込む */
+	// 設定ファイルから値を読み込む
 	$fp = fopen($cfgpath, 'r');
 	while(!feof($fp)) {
 		$line = fgets($fp);
@@ -52,12 +54,11 @@
 	}
 	fclose($fp);
 
-	/* WEB を指定秒数でリフレッシュ */
+	// WEB を指定秒数でリフレッシュ
 	$sec = intval($interval);
 
 	header("Refresh:$sec; url=index.php");		// index.php
-//	header("Refresh:$sec; url=monitor.php");	// monitor.php
-
+	//header("Refresh:$sec; url=monitor.php");	// monitor.php
 
 
 //==========================================================
@@ -78,14 +79,15 @@
 </head>
 
 <?php
-	/* <body> color の設定 */
+	// <body> color の設定
 	$str = sprintf("<body style=\"background-color: %s;\">", $bgcolor);
 	echo $str;
 
-	/* <div.wrapper> も同色に設定  == ヘッダー部== */
+	// <div.wrapper> も同色に設定  == ヘッダー部==
 	$str = sprintf("<div class=\"wrapper\" style=\"background-color: %s;\">", $bgcolor);
 	echo $str;
 
+	// ヘッダー用の画像が指定されているときの処理
 	if ((is_null($head_pic) != true) || (empty($head_pic) != true))
 	{
 		$str = sprintf("<div style=\"background: url('images/%s') %s %s %s;\">", $head_pic, $pic_posx, $pic_posy, $repeat);
@@ -93,13 +95,12 @@
 		$flag = 1;
 	}
 	else
-	{
+	{	// 指定されていないとき
 		echo '<div>';
 	}
 
 	echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
-//	if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
-
+	//if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
 
 
 //==========================================================
@@ -115,139 +116,95 @@
 
 <?php
 
-	//------------------------------------------------------
-	//  未登録コールサインの抽出
-	//------------------------------------------------------
+	// Pythonスクリプトを実行しその出力をファイルとして読み取る(rpi-multi_forward Status WEB)
+	$command = "python3 get_html.py";
+	$handle = popen($command, 'r');
+	$counter = 0;		// 必要な行を判別するためのカウンタ(必要行 100の台)
 
-	/* ログの最後から10行読み込む */
-	$fp = popen("tail -n 10 " . $multilogpath, 'r');
-
-	/* 一旦表示用配列から未登録をすべて消す */
-	foreach ($conuser as $i => $v)
+	if ($handle)
 	{
-		if ($v[2] == "Not registed")
+		// 出力を行ごとに読み取る
+		while (($line = fgets($handle)) !== false)
 		{
-			unset($conuser[$i]);
-		}
-	}
+    	    // 各行を$lineとして処理
+        	$line = trim($line);  // 不要な空白を削除
 
-	/* 10行比較し新たに未登録を検出 */
-	while($line = fgets($fp))
-	{
+			// $lineの内接続クライアントの行を特定する
+			if (preg_match("/Client/", $line)) $counter = 100;
 
-		/* 未登録コールサインが有ったら */
-		if (preg_match("/not regist/", $line))
-		{
-			$callsign = str_replace("\n", '', substr($line, 55, 8));
-
-			/* コールサインが空白の場合パスする */
-			if (strncmp($callsign, "  ", 2) == 0 ) continue;
-
-			/* 二重表示を防止する */
-			foreach ($conuser as $v)
+			// Clientを含む行から2行下の行が接続ユーザデータ
+			if ($counter > 102)
 			{
-				if ($v[1] == $callsign) continue 2;
-			}
+				$parts = [];
+				$parts = explode("</td><td>", $line);		// tableの一行を各データに分割
 
-			/* 日付/時間を指定の書式に変更 */
-			$logtime = substr($line, 0, 24);
-			$timestamp = strtotime($logtime);
+				$callsign =  substr($parts[0], 8, 8);		// 最初のpartsの<tr><td>:8文字の後ろ8文字がコールサイン
+				$port =  substr($parts[3], 8, -9);			// partsの4つ目がポート <center>xxxx</center>
+				$port_preg = "/" . $port . "/";				// preg_matchに使用するため正規表現として'/'で囲う
 
-			/* 日付/時間、コールサイン、ポートを配列に格納 */
-			$conuser[] = [$timestamp, $callsign, "Not registed"];
-		}
-	}
-	pclose($fp);
+				// port番号でmulti_forward.logからそのポートが使用された時刻を取得
+				$fp = fopen($multilogpath, 'r');
 
-
-	//----------------------------------------------------------
-	//  全接続ユーザの抽出
-	//----------------------------------------------------------
-
-	/* ログファイルを開く */
-	$fp = fopen($multilogpath, 'r');
-
-	/* 全行比較し接続・接続解除を突き合わせ */
-	while($line = fgets($fp))
-	{
-		/* multi_forward が最終的にリスタートした所から読み込む */
-		if (preg_match("/multi_forward/", $line))
-		{
-			$conuser = [];
-		}
-
-		/* もし接続ログがあったら */
-		if (preg_match("/Connect from/",  $line))
-		{
-
-			/* ポート番号を取得 */
-			$port = str_replace("\n", '', substr($line, strpos($line, '(') + 1, -2));
-			$portchk = $port;
-
-			/* すでにリスト中にポート番号が有った場合はスキップ */
-			foreach ($conuser as $v)
-			{
-				if ($v[2] == $port) continue 2;  // foreachの2階層上（while）に対してスキップ
-			}
-
-			/* コールサインを取得（空の場合 Unknown とする） */
-			if (substr($line, 38, 8) != " ")
-			{
-				$callsign = str_replace("\n", '', substr($line, 38, 8));
-			}
-			else
-			{
-				$callsign = "unknown";
-			}
-
-			/* 日付/時間を指定の書式に変更 */
-			$logtime = substr($line, 0, 24);
-			$timestamp = strtotime($logtime);
-
-			/* 日付/時間、コールサイン、ポートを配列に格納 */
-			$conuser[] = [$timestamp, $callsign, $port];
-
-		}
-
-		//----------------------------------------------------------
-		//  未登録を含む全ての接続解除コールサインを削除
-		//----------------------------------------------------------
-
-		/* 接続解除したポート番号を取得 */
-		if (preg_match("/Disconnect/", $line))
-		{
-			/* (timeout)の括弧を省いたfrom以後の文字列にする */
-			$subline = substr($line, strpos($line, 'from'));
-			$delport = str_replace("\n", '', substr($subline, strpos($subline, '(') + 1, -2));
-
-			/* 配列内を検索し同ポートを持つエントリーを削除 */
-			foreach ($conuser as $i => $v)
-			{
-				if ($v[2] == $delport)
+				// すべての接続ログに関してチェック
+				while($line2 = fgets($fp))
 				{
-					unset($conuser[$i]);
-				}
-			}
-		}
-	}
-	fclose($fp);
+					// 接続ログフィルタ
+					if (preg_match("/Connect from/", $line2))
+					{
+						// ポート番号が一致したとき
+						if (preg_match($port_preg, $line2))
+						{
+							// ログの先頭にある日付時刻を取得しループを終了
+							$logtime = substr($line2, 0, 24);
+							$timestamp = strtotime($logtime);
 
+							// ループを出る
+							break;
+						}
+
+					} else {
+
+						//接続ログでなければ次のループへ
+						continue;
+					}
+				}
+
+				// ログファイルをクローズする
+				fclose($fp);
+
+	            // 日付/時間、コールサイン、ポートを配列に格納
+    	        $conuser [] = [$timestamp, $callsign, $port];
+
+			}
+			$counter++;
+			if (preg_match("/<div Align=right>/", $line)) $counter = 0;
+		}
+
+		pclose($handle);
+
+	}
 
 	//----------------------------------------------------------
 	//  現在接続中のユーザリストを出力
 	//----------------------------------------------------------
 
-	/* 配列 $conuser を一行ずつ出力 (直近エントリーを上に） */
+	// 配列 $conuser を一行ずつ出力 (直近エントリーを上に）
 	arsort($conuser);
 	foreach ($conuser as $i => $v)
 	{
-		echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\" width=\"100\">".$v[2]."</td></tr>";
+		// ポート番号が入っていないものは省く
+		if ($v[2] !== "")
+		{
+			echo "<tr><td>".date('Y/m/d H:i:s', $v[0])."<td>".$v[1]."</td><td align=\"right\" width=\"100\">".$v[2]."</td></tr>";
+		}
 	}
 
-	/* 表の下部太罫線 */
+	// 表の下部太罫線
 	echo '<tr><td colspan=3 class="footer"></td></tr>';
 ?>
+
 </table>  <!-- 接続ユーザリストEnd--->
+
 
 <!--
 <b><span style="color:yellow;">"Multi Forward" is out of service >>></span> <a href="https://blog.goo.ne.jp/jarl_lab2" target="_blank" style="color:yellow;text-decoration:none;" >D-STAR NEWS</a></b>
@@ -277,30 +234,30 @@
 
 <?php
 
-	/* ログフィアルからデータを読み取り降順にする */
+	// ログフィアルからデータを読み取り降順にする
 	$tmp  = file($logpath);
 	arsort($tmp);
 
 
-	/* 読み込みデータの各行を一行ずつ変数に格納し各データに分解 */
-	$callcmp = [];		/* 配列 */
+	// 読み込みデータの各行を一行ずつ変数に格納し各データに分解
+	$callcmp = [];		// 配列の宣言
 	$count = 0;
 	foreach ($tmp as $line)
 	{
 		if ($count < $lines)
 		{
-			/* 同じコールサイン（拡張子省く）の場合処理をパスする */
+			// 同じコールサイン（拡張子省く）の場合処理をパスする
 			$callsign  = substr($line, 31,  8);
 			if (in_array($callsign, $callcmp) == true) continue;
 
-			 /* 正常なログ列でなかった場合処理をパスする */
+			// 正常なログ列でなかった場合処理をパスする
 			$timestamp = substr($line,  0, 19);
 			if ((substr($timestamp, 0, 4) > 2000) != true) continue;
 
-			/* 過去に出現（表示レベル）していない場合比較配列に入れる */
+			// 過去に出現（表示レベル）していない場合比較配列に入れる
 			$callcmp[] = $callsign;
 
-			/* 他のデータを取得 */
+			// 他のデータを取得
 			$suffix    = substr($line, 40,  4);
 			$temp      = substr($line, 60,  1);
 			if ($temp == 'A') $type = 'ZR';
@@ -308,7 +265,7 @@
 			$ur        = substr($line, 68,  8);
 			$message   = substr($line, 90, 20);
 
-			/* もしsuffix欄がnullだったら（Noragateway対策） */
+			// もしsuffix欄がnullだったら（Noragateway対策）
 			if ($suffix == " | r")
 			{
 				$suffix  = "Null";
@@ -319,14 +276,14 @@
 				$message = substr($line, 86, 20);
 			}
 
-			/* 各データをテーブルに表示 */
+			// 各データをテーブルに表示
 			if ($timestamp != NULL)
 			{
 				echo '<tr>
 				<td>'.$timestamp.'</td>
 				<td>'.$callsign.'</td>';
 
-				/* もしsuffix欄がnullだったら（Noragateway対策） */
+				// もしsuffix欄がnullだったら（Noragateway対策）
 				if (substr($suffix, 0, 4) == "Null")
 				{
 					echo '<td style="color:red;">'.$suffix.'</td>';
@@ -345,6 +302,7 @@
 	}
 
 ?>
+
 <tr><td colspan=6 class="footer"></td></tr>
 </table> <!-- ラストハードリストend --->
 
@@ -360,75 +318,73 @@
         <hr size="0" width="30%" color="#333399">
 
 <?php
-        /* os-releaseを読込みOSを判断 */
-        $fp = popen("cat /etc/os-release", 'r');
-        $line = fgets($fp);
-        if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-        pclose($fp);
+	// os-releaseを読込みOSを判断
+	$fp = popen("cat /etc/os-release", 'r');
+	$line = fgets($fp);
+	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+	pclose($fp);
 
-        /* PiOSの場合 */
-        if ($os_name == "Raspbian")
-        {
-                /* xchange のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-xchange", 'r');
-                $line = fgets($fp);
-                $xchange_ver = str_replace("\n", '', substr($line, 19, 5));
-                pclose($fp);
+	// PiOSの場合
+	if ($os_name == "Raspbian")
+	{
+		// xchange のバージョン情報を取得
+		$fp = popen("apt-cache madison rpi-xchange", 'r');
+		$line = fgets($fp);
+		$xchange_ver = str_replace("\n", '', substr($line, 19, 5));
+		pclose($fp);
 
-                /* multi_forward のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-multi-forward", 'r');
-                $line = fgets($fp);
-                $multi_ver = str_replace("\n", '', substr($line, 25, 5));
-                pclose($fp);
+		/* multi_forward のバージョン情報を取得 */
+		$fp = popen("apt-cache madison rpi-multi-forward", 'r');
+		$line = fgets($fp);
+		$multi_ver = str_replace("\n", '', substr($line, 25, 5));
+		pclose($fp);
 
-                /* dsgwd のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-dsgwd", 'r');
-                $line = fgets($fp);
-                $dsgwd_ver = str_replace("\n", '', substr($line, 18, 5));
-                pclose($fp);
+		/* dsgwd のバージョン情報を取得 */
+		$fp = popen("apt-cache madison rpi-dsgwd", 'r');
+		$line = fgets($fp);
+		$dsgwd_ver = str_replace("\n", '', substr($line, 18, 5));
+		pclose($fp);
 
-                /* dstatus のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-dstatus", 'r');
-                $line = fgets($fp);
-                $dstatus_ver = str_replace("\n", '', substr($line, 19, 5));
-                pclose($fp);
+		/* dstatus のバージョン情報を取得 */
+		$fp = popen("apt-cache madison rpi-dstatus", 'r');
+		$line = fgets($fp);
+		$dstatus_ver = str_replace("\n", '', substr($line, 19, 5));
+		pclose($fp);
 
-                /* decho のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-decho", 'r');
-                $line = fgets($fp);
-                $echo_ver = str_replace("\n", '', substr($line, 18, 5));
+		/* decho のバージョン除法を取得 */
+		$fp = popen("apt-cache madison rpi-decho", 'r');
+		$line = fgets($fp);
+		$echo_ver = str_replace("\n", '', substr($line, 18, 5));
 
-                /* d-prs のバージョン情報を取得 */
-                $fp = popen("apt-cache madison rpi-dprs", 'r');
-                $line = fgets($fp);
-                $dprs_ver = str_replace("\n", '', substr($line, 18, 5));
+		/* d-prs のバージョン除法を取得 */
+		$fp = popen("apt-cache madison rpi-dprs", 'r');
+		$line = fgets($fp);
+		$dprs_ver = str_replace("\n", '', substr($line, 18, 5));
 
-        }
-        else
-        /* CentOSの場合 */
-        {
-                /* xchange のバージョン情報を取得 */
-                $fp = popen("rpm -q xchange", 'r');
-                $line = fgets($fp);
-                $xchange_ver = str_replace("\n", '', substr($line, 0, 15));
-                pclose($fp);
+	}
+	else
+	{	// CentOSの場合(確認はしていません例に習って試してください)
 
-                /* multi_forward のバージョン情報を取得 */
-                $fp = popen("rpm -q multi_forward", 'r');
-                $line = fgets($fp);
-                $multi_ver = str_replace("\n", '', substr($line, 0, 21));
-                pclose($fp);
-        }
+		// xchange のバージョン情報を取得
+		$fp = popen("rpm -q xchange", 'r');
+		$line = fgets($fp);
+		$xchange_ver = str_replace("\n", '', substr($line, 0, 15));
+		pclose($fp);
 
-	/* バージョン情報を表示 */
+		// multi_forward のバージョン情報を取得
+		$fp = popen("rpm -q multi_forward", 'r');
+		$line = fgets($fp);
+		$multi_ver = str_replace("\n", '', substr($line, 0, 21));
+		pclose($fp);
+	}
 
-	// http://202.171.147.58の部分はご自身のサーバーのアドレスに変更してください。
-	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://202.171.147.58:20205" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
+	// バージョン情報を表示
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a><br>';
+	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20205" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
 ?>
 
 	<hr size="0" width="30%" color="#333399">
