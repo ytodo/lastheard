@@ -319,10 +319,11 @@ $version = "v.2.0.3";
 
 
 <!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
+<!--
     <span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS Bookworm 64bit</b></span><BR>
     <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span>
     <br><br>
-
+-->
 
 	<span style="color:white;font-size:16pt;">Version of Applications</span><br>
 	<hr size="0" width="30%" color="#333399">
