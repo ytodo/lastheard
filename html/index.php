@@ -21,6 +21,8 @@
  *
  */
 
+$version = "v.2.0.3";
+
 //==========================================================
 //  環境設定
 //==========================================================
@@ -130,7 +132,7 @@
         	$line = trim($line);  // 不要な空白を削除
 
 			// $lineの内接続クライアントの行を特定する
-			if (preg_match("/Client/", $line)) $counter = 100;
+			if (preg_match("/Client Information/", $line)) $counter = 100;
 
 			// Clientを含む行から2行下の行が接続ユーザデータ
 			if ($counter > 102)
@@ -177,7 +179,7 @@
 
 			}
 			$counter++;
-			if (preg_match("/<div Align=right>/", $line)) $counter = 0;
+			if (preg_match("/ Copyright/", $line)) $counter = 0;
 		}
 
 		pclose($handle);
@@ -307,15 +309,23 @@
 </table> <!-- ラストハードリストend --->
 
 
+<!-- フッター この部分はCC-BY-NC-SAに準じて消さないでください。------------------------------------------------------->
+<div class="footer">
+    <center>
+    <span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. <br>
+        <b>Last Heard <?php echo $version ?></b> applications are created by Yosh Todo/JE3HCZ <b>CC-BY-NC-SA</b></span>
+<!-- ここまで Creative Commons BY-NC-SA ------------------------------------------------------------------------------>
+    <br><br>
 
-<div class="footer"> <!-- フッター -->
-	<center>
-	<span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. 'Last Heard' applications are created by Yosh Todo/JE3HCZ CC-BY-NC-SA</span>
-	<br><br>
-	<span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS Bookworm 64bit</b></span><BR>
-	<span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br><br>
-        <span style="color:white;font-size:16pt;">Version of Applications</span><br>
-        <hr size="0" width="30%" color="#333399">
+
+<!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
+    <span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS Bookworm 64bit</b></span><BR>
+    <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span>
+    <br><br>
+
+
+	<span style="color:white;font-size:16pt;">Version of Applications</span><br>
+	<hr size="0" width="30%" color="#333399">
 
 <?php
 	// os-releaseを読込みOSを判断
