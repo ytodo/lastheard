@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.0.4";
+$version = "v.2.0.5";
 
 //==========================================================
 //  環境設定
@@ -336,6 +336,9 @@ $version = "v.2.0.4";
 	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
 	pclose($fp);
 
+	// このサーバのIPアドレスを取得
+	$global_ip = file_get_contents('https://api.ipify.org');
+
 	// PiOSの場合
 	if ($os_name == "Raspbian")
 	{
@@ -376,7 +379,7 @@ $version = "v.2.0.4";
 		pclose($fp);
 
 		// バージョン情報を表示
-		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
 		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
 		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
 		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
@@ -425,11 +428,11 @@ $version = "v.2.0.4";
 
 		// バージョン情報を表示
 		echo '<span style="font-size:12pt; color:white;">'."dsgwd v".$dsgwd_ver.'</span><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20201" target="_blank">'."xchange v".$xchange_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20202" target="_blank">'."multi_forward v".$multi_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20203" target="_blank">'."dprs v".$dprs_ver.'</a></br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20204" target="_blank">'."dstatus v".$dstatus_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20205" target="_blank">'."decho v".$decho_ver.'</a>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8080" target="_blank">'."xchange v".$xchange_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8081" target="_blank">'."multi_forward v".$multi_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8082" target="_blank">'."dprs v".$dprs_ver.'</a></br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8083" target="_blank">'."dstatus v".$dstatus_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8084" target="_blank">'."decho v".$decho_ver.'</a>';
 	}
 
 ?>
