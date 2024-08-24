@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.0.3";
+$version = "v.2.0.5";
 
 //==========================================================
 //  環境設定
@@ -203,6 +203,7 @@ $version = "v.2.0.3";
 
 	// 表の下部太罫線
 	echo '<tr><td colspan=3 class="footer"></td></tr>';
+
 ?>
 
 </table>  <!-- 接続ユーザリストEnd--->
@@ -335,6 +336,9 @@ $version = "v.2.0.3";
 	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
 	pclose($fp);
 
+	// このサーバのIPアドレスを取得
+	$global_ip = file_get_contents('https://api.ipify.org');
+
 	// PiOSの場合
 	if ($os_name == "Raspbian")
 	{
@@ -366,36 +370,71 @@ $version = "v.2.0.3";
 		$fp = popen("apt-cache madison rpi-decho", 'r');
 		$line = fgets($fp);
 		$echo_ver = str_replace("\n", '', substr($line, 18, 5));
+		pclose($fp);
 
 		/* d-prs のバージョン除法を取得 */
 		$fp = popen("apt-cache madison rpi-dprs", 'r');
 		$line = fgets($fp);
 		$dprs_ver = str_replace("\n", '', substr($line, 18, 5));
+		pclose($fp);
+
+		// バージョン情報を表示
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20200" target="_blank">'."rpi-dsgwd v.".$dsgwd_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20201" target="_blank">'."rpi-xchange v.".$xchange_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20202" target="_blank">'."rpi-multi_forward v.".$multi_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20203" target="_blank">'."rpi-dprs v.".$dprs_ver.'</a></br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20204" target="_blank">'."rpi-dstatus v.".$dstatus_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':20205" target="_blank">'."rpi-decho v.".$echo_ver.'</a>';
 
 	}
 	else
-	{	// CentOSの場合(確認はしていません例に習って試してください)
+	{	// AlmaLinux又はCentOSの場合(確認はしていません例に習って試してください)
+
+		// dsgwd のバージョン情報を取得
+		$fp = popen("rpm -qa | grep dsgwd", 'r');
+		$line = fgets($fp);
+		$dsgwd_ver = str_replace("\n",'', substr($line, 9, 6));
+		pclose($fp);
 
 		// xchange のバージョン情報を取得
-		$fp = popen("rpm -q xchange", 'r');
+		$fp = popen("rpm -q  xchange", 'r');
 		$line = fgets($fp);
-		$xchange_ver = str_replace("\n", '', substr($line, 0, 15));
+		$xchange_ver = str_replace("\n", '', substr($line,8 , 7));
 		pclose($fp);
 
 		// multi_forward のバージョン情報を取得
 		$fp = popen("rpm -q multi_forward", 'r');
 		$line = fgets($fp);
-		$multi_ver = str_replace("\n", '', substr($line, 0, 21));
+		$multi_ver = str_replace("\n", '', substr($line, 14, 7));
 		pclose($fp);
+
+		// dprs のバージョン情報を取得
+		$fp = popen("rpm -q dprs", 'r');
+		$line = fgets($fp);
+		$dprs_ver = str_replace("\n", '', substr($line, 5, 7));
+		pclose($fp);
+
+		// dstatus のバージョン情報を取得
+		$fp = popen("rpm -q dstatus", 'r');
+		$line = fgets($fp);
+		$dstatus_ver = str_replace("\n", '', substr($line, 8, 7));
+		pclose($fp);
+
+		// decho のバージョン情報を取得
+		$fp = popen("rpm -q decho", 'r');
+		$line = fgets($fp);
+		$decho_ver = str_replace("\n", '', substr($line, 6, 7));
+		pclose($fp);
+
+		// バージョン情報を表示
+		echo '<span style="font-size:12pt; color:white;">'."dsgwd v.".$dsgwd_ver.'</span><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8080" target="_blank">'."xchange v.".$xchange_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8081" target="_blank">'."multi_forward v.".$multi_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8082" target="_blank">'."dprs v.".$dprs_ver.'</a></br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8083" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$global_ip.':8084" target="_blank">'."decho v.".$decho_ver.'</a>';
 	}
 
-	// バージョン情報を表示
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20200" target="_blank">'."rpi-dsgwd v".$dsgwd_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20201" target="_blank">'."rpi-xchange v".$xchange_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20202" target="_blank">'."rpi-multi_forward v".$multi_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20203" target="_blank">'."rpi-dprs v".$dprs_ver.'</a></br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20204" target="_blank">'."rpi-dstatus v".$dstatus_ver.'</a><br>';
-	echo '<a style="font-size:12pt; color:white;" href="http://10.0.2.46:20205" target="_blank">'."rpi-decho v".$echo_ver.'</a>';
 ?>
 
 	<hr size="0" width="30%" color="#333399">
