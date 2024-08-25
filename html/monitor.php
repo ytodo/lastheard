@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.0.5";
+$version = "v.2.0.6";
 
 //==========================================================
 //  環境設定
@@ -321,8 +321,9 @@ $version = "v.2.0.5";
 
 <!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
 <!--
-    <span style="color:#ffffff;font-size:16pt;"><b>Now testing D-STAR GATEWAY SOFTWARE on Raspberry Pi OS Bookworm 64bit</b></span><BR>
-    <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span>
+    <span style="color:#ffffff;font-size:16pt;"><b>D-STAR GATEWAY on Raspberry Pi OS Bookworm 64bit</b></span><BR>
+    <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b><br></span>
+	<span style="color:#333399;font-size:16pt;"><b>Last Heard is also available on AlmaLinux</b></span>
     <br><br>
 -->
 
