@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.0.6";
+$version = "v.2.0.7";
 
 //==========================================================
 //  環境設定
@@ -36,8 +36,19 @@ $version = "v.2.0.6";
 	// 対象のファイルパス
 	$logpath = '/var/log/lastheard.log';
 	$cfgpath = './conf/db.conf';
-	$multilogpath = '/var/log/rpi-multi_forward.log';	// Raspberry Pi
-	//$multilogpath = '/var/log/multi_forward.log';		// AlmaLinux
+
+	// os-releaseを読込みOSを判断
+	$fp = popen("cat /etc/os-release", 'r');
+	$line = fgets($fp);
+	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+	pclose($fp);
+
+	if ($os_name == "Raspbian")
+	{
+		$multilogpath = '/var/log/rpi-multi_forward.log';	// Raspberry Pi
+	} else {
+		$multilogpath = '/var/log/multi_forward.log';		// AlmaLinux
+	}
 
 	// 設定ファイルから値を読み込む
 	$fp = fopen($cfgpath, 'r');
@@ -331,12 +342,6 @@ $version = "v.2.0.6";
 	<hr size="0" width="30%" color="#333399">
 
 <?php
-	// os-releaseを読込みOSを判断
-	$fp = popen("cat /etc/os-release", 'r');
-	$line = fgets($fp);
-	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-	pclose($fp);
-
 	// このサーバのIPアドレスを取得
 	$global_ip = file_get_contents('https://api.ipify.org');
 
