@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.0.9";
+$version = "v.2.1.1";
 
 //==========================================================
 //  環境設定
@@ -33,11 +33,24 @@ $version = "v.2.0.9";
 	// 規定値でタイムゾーンを設定
 	date_default_timezone_set('Asia/Tokyo');
 
-	// 対象のファイルパス
-	$logpath = '/var/log/lastheard.log';
-	$cfgpath = './conf/db.conf';
-	$multilogpath = '/var/log/rpi-multi_forward.log';	// Raspberry Pi
-	//$multilogpath = '/var/log/multi_forward.log';		// AlmaLinux
+    // 対象のファイルパス
+    $logpath = '/var/log/lastheard.log';
+    $cfgpath = './conf/db.conf';
+    $timepath = './rpt/oldesttime.txt';
+    $lhuserspath = './rpt/lastheardusers.txt';
+
+    // os-releaseを読込みOSを判断
+    $fp = popen("cat /etc/os-release", 'r');
+    $line = fgets($fp);
+    if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+    pclose($fp);
+
+    if ($os_name == "Raspbian")
+    {
+        $multilogpath = '/var/log/rpi-multi_forward.log';   // Raspberry Pi
+    } else {
+        $multilogpath = '/var/log/multi_forward.log';       // AlmaLinux
+    }
 
 	// 設定ファイルから値を読み込む
 	$fp = fopen($cfgpath, 'r');
@@ -59,8 +72,16 @@ $version = "v.2.0.9";
 	// WEB を指定秒数でリフレッシュ
 	$sec = intval($interval);
 
-	//header("Refresh:$sec; url=index.php");		// index.php
-	header("Refresh:$sec; url=monitor.php");	// monitor.php
+    // このプログラムのファイル名を取得
+    $filename = basename(__FILE__);
+
+    // このプログラム自体をリフレッシュする
+    if ($filename == "index.php")
+    {
+	    header("Refresh:$sec; url=index.php");		// index.php
+    } else {
+    	header("Refresh:$sec; url=monitor.php");	// monitor.php
+    }
 
 
 //==========================================================
@@ -71,13 +92,14 @@ $version = "v.2.0.9";
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <?php
 	echo '<title>'.$rptcall.' D-STAR DASHBOARD</title>';
 ?>
 
 <link rel="stylesheet" href="css/db.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <?php
@@ -282,9 +304,16 @@ $version = "v.2.0.9";
 			// 各データをテーブルに表示
 			if ($timestamp != NULL)
 			{
+                // $callsignに空白が含まれる場合 $callsign_link にアンダースコアと置き換えたものを入れる
+                $callsign_link = str_replace(" ", "_", trim($callsign));
+
 				echo '<tr>
 				<td>'.$timestamp.'</td>
-				<td>'.$callsign.'</td>';
+                <td><a href="#" style="text-decoration:none;" onclick="openFixedSizeWindow(\''.trim($callsign_link).'\')">'.htmlspecialchars($callsign).'</a>
+                    <script>function openFixedSizeWindow(callsign_link) {
+                         window.open("./rpt/" + callsign_link + ".html", "", "width=1020,height=700");
+                    }
+                </script></td>';
 
 				// もしsuffix欄がnullだったら（Noragateway対策）
 				if (substr($suffix, 0, 4) == "Null")
@@ -299,6 +328,37 @@ $version = "v.2.0.9";
 				<td>'.$ur.'</td>
 				<td>'.$message.'</td>
 				</tr>';
+
+                //
+                // rpi-monitorのユーザログで使用するため ====================
+                //
+
+                // LastHeardの中で最も古い日付を記録
+                $fp = fopen($timepath, 'w');
+                if ($fp)
+                {
+                    fwrite($fp, $timestamp);
+                }
+                fclose($fp);
+
+                // 現在LastHeardにリストされているユーザのコールサインを記録
+                if ($count == 0)
+                {
+                    $fp = fopen($lhuserspath, 'w');
+                }
+                else
+                {
+                    $fp = fopen($lhuserspath, 'a');
+                }
+
+                if ($fp)
+                {
+                    fwrite($fp, $callsign . PHP_EOL);
+                }
+                fclose($fp);
+                //===========================================================
+
+
 			}
 			$count++;
 		}
@@ -314,7 +374,7 @@ $version = "v.2.0.9";
 <div class="footer">
     <center>
     <span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. <br>
-        <b>Last Heard <?php echo $version ?></b> applications are created by Yosh Todo/JE3HCZ <b>CC-BY-NC-SA</b></span>
+        <b>LastHeard <?php echo $version ?></b> applications are created by Yosh Todo/JE3HCZ <b>CC-BY-NC-SA</b></span>
 <!-- ここまで Creative Commons BY-NC-SA ------------------------------------------------------------------------------>
     <br><br>
 
@@ -337,8 +397,13 @@ $version = "v.2.0.9";
 	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
 	pclose($fp);
 
-	// このサーバのIPアドレスを取得
-	$server_ip = $_SERVER['SERVER_ADDR'];
+    // このサーバのグローバルIPアドレスを取得
+    if ($filename == "index.php")
+    {
+        $server_ip = file_get_contents('https://api.ipify.org');
+    } else {
+        $server_ip = $_SERVER['SERVER_ADDR'];
+    }
 
 	// PiOSの場合
 	if ($os_name == "Raspbian")
@@ -379,17 +444,23 @@ $version = "v.2.0.9";
 		$dprs_ver = str_replace("\n", '', substr($line, 18, 5));
 		pclose($fp);
 
-		// バージョン情報を表示
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20200" target="_blank">'."rpi-dsgwd v.".$dsgwd_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20201" target="_blank">'."rpi-xchange v.".$xchange_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20202" target="_blank">'."rpi-multi_forward v.".$multi_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20203" target="_blank">'."rpi-dprs v.".$dprs_ver.'</a></br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20204" target="_blank">'."rpi-dstatus v.".$dstatus_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20205" target="_blank">'."rpi-decho v.".$echo_ver.'</a>';
+        /* rpi-monitor のバージョン情報を取得 */
+        $fp = popen("apt-cache madison rpi-monitor", 'r');
+        $line = fgets($fp);
+        $monitor_ver = str_replace("\n", '', substr($line, 19, 5));
+        pclose($fp);
 
+        // バージョン情報を表示
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20200" target="_blank">'."rpi-dsgwd v.".$dsgwd_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20201" target="_blank">'."rpi-xchange v.".$xchange_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20202" target="_blank">'."rpi-multi_forward v.".$multi_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20203" target="_blank">'."rpi-dprs v.".$dprs_ver.'</a></br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20204" target="_blank">'."rpi-dstatus v.".$dstatus_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20205" target="_blank">'."rpi-decho v.".$echo_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;">'."rpi-monitor v.".$monitor_ver.'</a>';
 	}
 	else
-	{	// AlmaLinux又はCentOSの場合(確認はしていません例に習って試してください)
+	{	// AlmaLinux又はCentOSの場合
 
 		// dsgwd のバージョン情報を取得
 		$fp = popen("rpm -qa | grep dsgwd", 'r');
@@ -445,4 +516,3 @@ $version = "v.2.0.9";
 </div>
 </body>
 </html>
-
