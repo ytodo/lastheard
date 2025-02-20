@@ -1,0 +1,12 @@
+[Unit]
+Description=make database file from rpi-monitor log
+After = rpi-xchange.service
+
+[Service]
+ExecStart=sudo python /var/www/html/log2database.py
+Restart=always
+Type=simple
+PIDFile = /run/log2database.pid
+
+[Install]
+WantedBy=multi-user.target
