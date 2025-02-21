@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database"                                               #
-app_ver  = "0.0.1β"                                                     #
+app_ver  = "0.0.1 RC"                                                   #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -16,7 +16,7 @@ import os
 import logging
 
 # 追加されたログのみを位置変数を利用して抽出する
-def read_new_lines(logfile, last_position, stop_keyword="ポートは", interval=3):
+def read_new_lines(logfile, last_position, stop_keyword="ホールパンチ", interval=5):
 
     logging.info("読み取り開始")
 
@@ -103,7 +103,7 @@ def cleanup_files(callsign_file, callsign):
         users = [line.rstrip().rstrip("\n") for line in f]
 
         # 除外するファイル
-        keep_files = {"lastheardusers.txt", "oldesttime.txt", f"{callsign_file}.php", f"{callsign_file}.png", f"{callsign}.html", f"{callsign}_out.html"}
+        keep_files = {"lastheardusers.txt", "oldesttime.txt", f"{callsign_file}.php", f"{callsign_file}.png", f"{callsign}.html"}
         logging.info(f"削除除外ファイル : {keep_files}")
 
         # フォルダ内のファイルを取得
@@ -161,7 +161,7 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
                 # URLの部分をファイル名だけの相対URLに置き換える
                 url = line[start:end]
 
-                # '/'で分割して[-1](最後)のファイル名ノブ部だけ取得してURLと置き換える
+                # '/'で分割して[-1](最後)のファイル名の部分だけ取得してURLと置き換える
                 filename = url.split('/')[-1]
                 line = line.replace(url, f'{filename}', 1)
 
@@ -176,19 +176,9 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
         logging.info(f"callsign: {callsign} (type: {type(callsign)})")
 
         with open('/var/www/html/rpt/' + callsign.rstrip() + '.html', 'w') as f:
-            f.write('<html><head>')
-            f.write('<meta charset="UTF-8">')
-            f.write('<script>')
-            f.write('let newWin = window.open("", "", "width=300,height=200");')
-            f.write('newWin.document.write("<p>テキストの長さに応じて調整</p>");')
-            f.write('setTimeout(() => {')
-            f.write('    let rect = newWin.document.body.getBoundingClientRect();')
-            f.write('    newWin.resizeTo(rect.width + 40, rect.height + 80);')
-            f.write('}, 500);')
-            f.write('</script>')
-            f.write('</head><body><pre>' + '\n')
+            f.write('<html><body><pre>' + '\n')
             f.write('<br><br>'.join(new_block) + '<br><br>')
-            f.write('</pre></body><html>')
+            f.write('</pre></body></html>')
 
         logging.info("Data store updated.")
 
