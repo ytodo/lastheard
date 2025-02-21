@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database"                                               #
-app_ver  = "0.0.1β"                                                     #
+app_ver  = "0.0.1 RC"                                                   #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -16,7 +16,7 @@ import os
 import logging
 
 # 追加されたログのみを位置変数を利用して抽出する
-def read_new_lines(logfile, last_position, stop_keyword="ホールパンチ", interval=5):
+def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをONにしてみて下さい", interval=5):
 
     logging.info("読み取り開始")
 
@@ -95,6 +95,9 @@ def extract_identifier(line, keyword, start, end):
 # データフォルダ内のファイルを整理する
 def cleanup_files(callsign_file, callsign):
 
+    if callsign is None:
+        return
+
     # データフォルダの定義
     folder_path = Path("/var/www/html/rpt/")
 
@@ -111,7 +114,7 @@ def cleanup_files(callsign_file, callsign):
             file_path = os.path.join(folder_path, file_name)
 
             # file_name が callsign で始まるかチェック
-            if file_name.startswith(callsign):
+            if callsign and file_name.startswith(callsign):
 
                 # 削除除外ファイルなら削除せずパス
                 if file_name in keep_files:
@@ -133,7 +136,7 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
     # 取得したデータ
     for line in new_lines:
 
-        if callsign is None and keyword1 in line:
+        if not callsign and keyword1 in line:
 
             start =  3
             end   = 11
@@ -141,7 +144,7 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
             # コールサインを特定する
             callsign = extract_identifier(line, keyword1, start, end).rstrip()
 
-        if callsign is None and keyword2 in line:
+        if not callsign and keyword2 in line:
 
             start =  5
             end   = 13
@@ -176,9 +179,9 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
         logging.info(f"callsign: {callsign} (type: {type(callsign)})")
 
         with open('/var/www/html/rpt/' + callsign.rstrip() + '.html', 'w') as f:
-            f.write('<html><body><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>' + '\n')
-            f.write('<pre><br><br>'.join(new_block) + '<br><br></pre>')
-            f.write('</body></html>')
+            f.write('<html><body><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><pre>' + '\n')
+            f.write('<br><br>'.join(new_block) + '<br><br>')
+            f.write('</pre></body></html>')
 
         logging.info("Data store updated.")
 
