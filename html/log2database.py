@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database"                                               #
-app_ver  = "0.0.1 RC"                                                   #
+app_ver  = "0.0.1β"                                                     #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -176,9 +176,9 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
         logging.info(f"callsign: {callsign} (type: {type(callsign)})")
 
         with open('/var/www/html/rpt/' + callsign.rstrip() + '.html', 'w') as f:
-            f.write('<html><body><pre>' + '\n')
-            f.write('<br><br>'.join(new_block) + '<br><br>')
-            f.write('</pre></body></html>')
+            f.write('<html><body><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head>' + '\n')
+            f.write('<pre><br><br>'.join(new_block) + '<br><br></pre>')
+            f.write('</body></html>')
 
         logging.info("Data store updated.")
 

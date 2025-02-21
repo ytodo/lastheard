@@ -311,7 +311,7 @@ $version = "v.2.1.1";
                 <td>'.$timestamp.'</td>
                 <td><a href="#" style="text-decoration:none;" onclick="openFixedSizeWindow(\''.trim($callsign_link).'\')">'.htmlspecialchars($callsign).'</a>
                     <script>function openFixedSizeWindow(callsign_link) {
-                         window.open("./rpt/" + callsign_link + ".html", "", "width=1020,height=700");
+                         window.open("./rpt/" + callsign_link + ".html", "", "width=1020, height=700");
                     }
                 </script></td>';
 
