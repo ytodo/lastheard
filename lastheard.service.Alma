@@ -1,0 +1,11 @@
+[Unit]
+Description = LastHeard daemon
+After = xchange.service
+
+[Service]
+ExecStart = /usr/local/bin/lastheard
+Restart = always
+Type = simple
+
+[Install]
+WantedBy = multi-user.target
