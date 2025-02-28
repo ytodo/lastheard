@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database"                                               #
-app_ver  = "0.0.1 RC"                                                   #
+app_ver  = "0.0.2"                                                      #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -64,6 +64,8 @@ def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをON
                 if empty_lines >= 2:
                     exit_loop = True
                     break
+        else:
+            continue
 
         if exit_loop:
             break
