@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database"                                               #
-app_ver  = "0.0.2"                                                      #
+app_ver  = "0.0.3"                                                      #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -55,12 +55,14 @@ def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをON
                 # 特定のキーワードを含む行があったらループを抜ける(最終行と見なす）
                 if stop_keyword in line:
 
+                    # stop_keywordが見つかったらその行は取得して終了
+                    new_lines.append(line)
                     logging.info(f"停止キーワード '{stop_keyword}' が見つかりました。読み取り終了")
 
                     # 直ちにリターン
                     return new_lines, new_position
 
-                # 2行以上の空白行が来たらループを抜ける
+                # 2行以上の空白行が来たらループを抜ける変数を真にして forを抜ける
                 if empty_lines >= 2:
                     exit_loop = True
                     break
@@ -180,12 +182,17 @@ def update_data_store(new_lines, keyword1, keyword2, callsign_file):
         callsign = callsign.replace(" ", "_")
         logging.info(f"callsign: {callsign} (type: {type(callsign)})")
 
+        # キャッシュをクリアするヘッダーを加えてデータhtmlを作成(metaの下部三行)
         with open('/var/www/html/rpt/' + callsign.rstrip() + '.html', 'w') as f:
-            f.write('<html><body><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><pre>' + '\n')
+            f.write('<html><body><head>' + '\n')
+            f.write('<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' + '\n')
+            f.write('<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">' + '\n')
+            f.write('<meta http-equiv="Pragma" content="no-cache">' + '\n')
+            f.write('<meta http-equiv="Expires" content="0"></head><pre>' + '\n')
             f.write('<br><br>'.join(new_block) + '<br><br>')
             f.write('</pre></body></html>')
 
-        logging.info("Data store updated.")
+        logging.info(f"{callsign.rstrip()}.htmlが更新されました。")
 
         return callsign
 
