@@ -56,8 +56,7 @@ def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをON
                 if stop_keyword in line:
 
                     # stop_keywordが見つかったらその行は取得して終了
-                    new_lines.append(line)
-                    logging.info(f"停止キーワード '{stop_keyword}' が見つかりました。読み取り終了")
+                    logging.info(f"最終データ '{stop_keyword}' が見つかりました。読み取り終了")
 
                     # 直ちにリターン
                     return new_lines, new_position

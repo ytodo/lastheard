@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.1.1";
+$version = "v.2.1.2";
 
 //==========================================================
 //  環境設定
@@ -92,14 +92,10 @@ $version = "v.2.1.1";
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
-
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-
-
 
 <?php
 	echo '<title>'.$rptcall.' D-STAR DASHBOARD</title>';

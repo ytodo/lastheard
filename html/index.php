@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.1.1";
+$version = "v.2.1.2";
 
 //==========================================================
 //  環境設定
@@ -93,6 +93,9 @@ $version = "v.2.1.1";
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <?php
 	echo '<title>'.$rptcall.' D-STAR DASHBOARD</title>';
@@ -124,7 +127,7 @@ $version = "v.2.1.1";
 	}
 
 	echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
-	if ($flag == 1) echo '<br>';    // 画像を入れた場合タイトルと重なるのを防ぐ時は有効に
+//	if ($flag == 1) echo '<br>';    // 画像を入れた場合タイトルと重なるのを防ぐ時は有効に
 
 
 //==========================================================
