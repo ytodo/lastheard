@@ -1,6 +1,6 @@
 [Unit]
 Description = LastHeard daemon
-After = rpi-xchange.service
+After = rpi-dsgwd.service
 
 [Service]
 ExecStart = /usr/local/bin/lastheard
