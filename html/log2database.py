@@ -14,6 +14,7 @@ import time
 import re
 import os
 import logging
+import fnmatch
 
 # 追加されたログのみを位置変数を利用して抽出する
 def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをONにしてみて下さい", interval=5):
@@ -98,8 +99,12 @@ def extract_identifier(line, keyword, start, end):
 # データフォルダ内のファイルを整理する
 def cleanup_files(callsign_file, callsign):
 
+    # callsignが空の場合は戻る
     if callsign is None:
         return
+
+    # 除外するファイル(今回変更の有ったファイル）
+    keep_files = {"lastheardusers.txt", "oldesttime.txt", f"{callsign_file}.php", f"{callsign_file}.png", f"{callsign}.html"}
 
     # データフォルダの定義
     folder_path = Path("/var/www/html/rpt/")
@@ -108,25 +113,66 @@ def cleanup_files(callsign_file, callsign):
     with open('/var/www/html/rpt/lastheardusers.txt', 'r') as f:
         users = [line.rstrip().rstrip("\n") for line in f]
 
-        # 除外するファイル
-        keep_files = {"lastheardusers.txt", "oldesttime.txt", f"{callsign_file}.php", f"{callsign_file}.png", f"{callsign}.html"}
-        logging.info(f"削除除外ファイル : {keep_files}")
+    # LastHeardに表示されているユーザリストを空の集合として初期化
+    list_files = set()
 
-        # フォルダ内のファイルを取得
-        for file_name in os.listdir(folder_path):
-            file_path = os.path.join(folder_path, file_name)
+    # ラストハードリストに有るコールサイン
+    for user in users:
 
-            # file_name が callsign で始まるかチェック
-            if callsign and file_name.startswith(callsign):
+        # スペースの入っているコールサインをアンダースコアでつなぐ
+        user = user.replace(" ", "_")
 
-                # 削除除外ファイルなら削除せずパス
-                if file_name in keep_files:
-                    continue
+        # LastHeardのリストされているユーザのファイルすべて
+        list_files |= {
+            f"{user}*.php",
+            f"{user}*.png",
+            f"{user}.html"
+        }
 
-                # それ以外のコールサインごとに選択された過去のファイルは削除
-                else:
+    # マージ
+    #keep_files |= list_files
+    logging.info(f"削除除外ファイル : {keep_files}")
+
+    # フォルダ内のファイルを取得
+    for file_name in os.listdir(folder_path):
+
+        # ファイルのパスを取得
+        file_path = os.path.join(folder_path, file_name)
+
+        # file_name が callsign で始まるかチェック
+        if callsign and file_name.startswith(callsign):
+
+            # 削除除外ファイルなら削除せずパス（直近取得したデータ）
+            if file_name in keep_files:
+                continue
+
+            # 同ユーザーの過去のファイルは削除
+            else:
+                os.remove(file_path)
+                logging.info(f"Deleted: {file_path}")
+
+    # フォルダ内のファイルを取得
+    for file_name in os.listdir(folder_path):
+
+        # LastHeardリストに表示されているユーザのファイルは残しその他は捨てる
+        for pattern in list_files:
+
+            should_remove = True
+
+            # 削除除外ファイルなら削除せずパス（直近取得したデータ）
+            if file_name in keep_files:
+                continue
+
+            if fnmatch.fnmatch(file_name, pattern):
+                should_remove = False
+                continue
+
+            if should_remove:
+                if os.path.exists(file_path):
                     os.remove(file_path)
                     logging.info(f"Deleted: {file_path}")
+                #else:
+                    #logging.info(f"存在しないファイル: {file_path}")
 
 
 # 新規取得したデータをファイルに書き込む(callsign.html)

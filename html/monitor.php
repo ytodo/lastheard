@@ -513,6 +513,33 @@ $version = "v.2.1.2";
 ?>
 
 	<hr size="0" width="30%" color="#333399">
+
+    <br>
+    <div style="background-color:white;">
+        <?php   // Get temperature
+
+            if ($os_name == "Raspbian")
+            {
+                $fp = popen("cat /sys/class/thermal/thermal_zone0/temp", 'r');
+                $temp = fgets($fp);
+                $temp = round($temp * 0.001,1);
+                if (strlen($temp) < 3) $temp = $temp.".0";
+            }
+            else    // AlmaLinux
+            {
+                $temp = shell_exec("sensors | awk '/Package id 0:/ { gsub(/\\+|°C/, \"\", \$4); printf \"%.1f\\n\", \$4 }'");
+            }
+
+            // 温度により色を変えて表示
+            echo '<span style="font-size:12pt;">Server Temp.: ';
+            if ($temp < 45) echo '<span style="color:green;">'.$temp."'C";
+            if ($temp >= 45 && $temp < 50) echo "<span style=\"color:yellow\">".$temp."'C";
+            if ($temp >= 50 && $temp < 55) echo "<span style=\"color:black;background-color:orange\">".$temp."'C";
+            if ($temp >= 55) echo "<span style=\"color:yellow; background-color:red;\">".$temp."'C";
+            pclose($fp);
+        ?>
+    </div>
+
 	</center>
 </div>
 
