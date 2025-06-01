@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database.py"                                            #
-app_ver  = "0.0.5"                                                      #
+app_ver  = "0.0.6"                                                      #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -67,8 +67,6 @@ def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをON
                     exit_loop = True
                     break
         else:
-
-            # linesを取得していないときもインターバルを取る（無限ループでCPU負荷大)
             time.sleep(interval)
             continue
 
@@ -280,10 +278,10 @@ def monitor_log(logfile, keyword1, keyword2, interval=5):
                         callsign_file = line[start:end]
                         logging.info(f"最新のデータファイル名 : {callsign_file}")
 
+            # データ更新関数を実行
             callsign = update_data_store(new_lines, keyword1, keyword2, callsign_file)
 
-        # コールサインが変更されて居ないときは無駄にクリーンアップをコールしない（CPU負荷大）
-        if callsign:
+            # 追加データが有った時のみクリーンアップ
             cleanup_files(callsign_file, callsign)
 
         # 一定時間待機
@@ -309,7 +307,7 @@ if __name__ == "__main__":
     keyword2 = "from"
 
     logging.info("************************************************************************************************************" + "\n" +
-                f"                                  rpi-monitorログの最新データよりデータベースファイルの作成するアプリケーション({app_name}.py ver.{app_ver})" + "\n" +
+                f"                                  rpi-monitorログの最新データよりデータベースファイルの作成するアプリケーション({app_name} ver.{app_ver})" + "\n" +
                  "                                 ************************************************************************************************************")
 
     # モニターの開始
