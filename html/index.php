@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.1.4";
+$version = "v.2.1.5";
 
 //==========================================================
 //  環境設定
@@ -144,7 +144,7 @@ $version = "v.2.1.4";
 <?php
 
 	// Pythonスクリプトを実行しその出力をファイルとして読み取る(rpi-multi_forward Status WEB)
-	$command = "python3 get_html.py";
+	$command = "python get_html.py";
 	$handle = popen($command, 'r');
 	$counter = 0;		// 必要な行を判別するためのカウンタ(必要行 100の台)
 

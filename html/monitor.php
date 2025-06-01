@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.1.4";
+$version = "v.2.1.5";
 
 //==========================================================
 //  環境設定
@@ -33,24 +33,24 @@ $version = "v.2.1.4";
 	// 規定値でタイムゾーンを設定
 	date_default_timezone_set('Asia/Tokyo');
 
-    // 対象のファイルパス
-    $logpath = '/var/log/lastheard.log';
-    $cfgpath = './conf/db.conf';
+	// 対象のファイルパス
+	$logpath = '/var/log/lastheard.log';
+	$cfgpath = './conf/db.conf';
     $timepath = './rpt/oldesttime.txt';
     $lhuserspath = './rpt/lastheardusers.txt';
 
-    // os-releaseを読込みOSを判断
-    $fp = popen("cat /etc/os-release", 'r');
-    $line = fgets($fp);
-    if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-    pclose($fp);
+	// os-releaseを読込みOSを判断
+	$fp = popen("cat /etc/os-release", 'r');
+	$line = fgets($fp);
+	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+	pclose($fp);
 
-    if ($os_name == "Raspbian")
-    {
-        $multilogpath = '/var/log/rpi-multi_forward.log';   // Raspberry Pi
-    } else {
-        $multilogpath = '/var/log/multi_forward.log';       // AlmaLinux
-    }
+	if ($os_name == "Raspbian")
+	{
+		$multilogpath = '/var/log/rpi-multi_forward.log';	// Raspberry Pi
+	} else {
+		$multilogpath = '/var/log/multi_forward.log';		// AlmaLinux
+	}
 
 	// 設定ファイルから値を読み込む
 	$fp = fopen($cfgpath, 'r');
@@ -78,9 +78,9 @@ $version = "v.2.1.4";
     // このプログラム自体をリフレッシュする
     if ($filename == "index.php")
     {
-	    header("Refresh:$sec; url=index.php");		// index.php
+        header("Refresh:$sec; url=index.php");      // index.php
     } else {
-    	header("Refresh:$sec; url=monitor.php");	// monitor.php
+        header("Refresh:$sec; url=monitor.php");    // monitor.php
     }
 
 
@@ -127,7 +127,7 @@ $version = "v.2.1.4";
 	}
 
 	echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
-	//if ($flag == 1) echo '<br>';    // 画像を入れた場合スペースを増やす必要の有る時は有効に
+//	if ($flag == 1) echo '<br>';    // 画像を入れた場合タイトルと重なるのを防ぐ時は有効に
 
 
 //==========================================================
@@ -144,7 +144,7 @@ $version = "v.2.1.4";
 <?php
 
 	// Pythonスクリプトを実行しその出力をファイルとして読み取る(rpi-multi_forward Status WEB)
-	$command = "python3 get_html.py";
+	$command = "python get_html.py";
 	$handle = popen($command, 'r');
 	$counter = 0;		// 必要な行を判別するためのカウンタ(必要行 100の台)
 
@@ -310,8 +310,8 @@ $version = "v.2.1.4";
                 // $callsignに空白が含まれる場合 $callsign_link にアンダースコアと置き換えたものを入れる
                 $callsign_link = str_replace(" ", "_", trim($callsign));
 
-				echo '<tr>
-				<td>'.$timestamp.'</td>
+                echo '<tr>
+                <td>'.$timestamp.'</td>
                 <td><a href="#" style="text-decoration:none;" onclick="openFixedSizeWindow(\''.trim($callsign_link).'\')">'.htmlspecialchars($callsign).'</a>
                     <script>function openFixedSizeWindow(callsign_link) {
                          window.open("./rpt/" + callsign_link + ".html", "", "width=1020, height=700");
@@ -331,6 +331,7 @@ $version = "v.2.1.4";
 				<td>'.$ur.'</td>
 				<td>'.$message.'</td>
 				</tr>';
+
 
                 //
                 // rpi-monitorのユーザログで使用するため ====================
@@ -361,7 +362,6 @@ $version = "v.2.1.4";
                 fclose($fp);
                 //===========================================================
 
-
 			}
 			$count++;
 		}
@@ -385,7 +385,7 @@ $version = "v.2.1.4";
 <!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
 <!--
     <span style="color:#ffffff;font-size:16pt;"><b>D-STAR GATEWAY on Raspberry Pi OS Bookworm 64bit</b></span><BR>
-    <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b><br></span>
+    <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br>
 	<span style="color:#333399;font-size:16pt;"><b>Last Heard is also available on AlmaLinux</b></span>
     <br><br>
 -->
@@ -394,16 +394,16 @@ $version = "v.2.1.4";
 	<hr size="0" width="30%" color="#333399">
 
 <?php
-	// os-releaseを読込みOSを判断
-	$fp = popen("cat /etc/os-release", 'r');
-	$line = fgets($fp);
-	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-	pclose($fp);
+    // os-releaseを読込みOSを判断
+    $fp = popen("cat /etc/os-release", 'r');
+    $line = fgets($fp);
+    if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+    pclose($fp);
 
-    // このサーバのグローバルIPアドレスを取得
+	// このサーバのグローバルIPアドレスを取得
     if ($filename == "index.php")
     {
-        $server_ip = file_get_contents('https://api.ipify.org');
+    	$server_ip = file_get_contents('https://api.ipify.org');
     } else {
         $server_ip = $_SERVER['SERVER_ADDR'];
     }
@@ -501,19 +501,18 @@ $version = "v.2.1.4";
 		$decho_ver = str_replace("\n", '', substr($line, 6, 7));
 		pclose($fp);
 
-		// バージョン情報を表示
-		echo '<span style="font-size:12pt; color:white;">'."dsgwd v.".$dsgwd_ver.'</span><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8080" target="_blank">'."xchange v.".$xchange_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8081" target="_blank">'."multi_forward v.".$multi_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8082" target="_blank">'."dprs v.".$dprs_ver.'</a></br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8083" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8084" target="_blank">'."decho v.".$decho_ver.'</a>';
+        // バージョン情報を表示
+        echo '<span style="font-size:12pt; color:white;">'."dsgwd v.".$dsgwd_ver.'</span><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8080" target="_blank">'."xchange v.".$xchange_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8081" target="_blank">'."multi_forward v.".$multi_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8082" target="_blank">'."dprs v.".$dprs_ver.'</a></br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8083" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
+        echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8084" target="_blank">'."decho v.".$decho_ver.'</a>';
 	}
 
 ?>
 
 	<hr size="0" width="30%" color="#333399">
-
     <br>
     <div style="background-color:white;">
         <?php   // Get temperature
@@ -539,7 +538,6 @@ $version = "v.2.1.4";
             pclose($fp);
         ?>
     </div>
-
 	</center>
 </div>
 
