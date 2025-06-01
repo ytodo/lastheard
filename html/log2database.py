@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database"                                               #
-app_ver  = "0.0.3"                                                      #
+app_ver  = "0.0.4"                                                      #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -67,6 +67,7 @@ def read_new_lines(logfile, last_position, stop_keyword="ホールパンチをON
                     exit_loop = True
                     break
         else:
+            time.sleep(interval)
             continue
 
         if exit_loop:
@@ -280,7 +281,9 @@ def monitor_log(logfile, keyword1, keyword2, interval=5):
             callsign = update_data_store(new_lines, keyword1, keyword2, callsign_file)
 
         # 一定時間待機
-        cleanup_files(callsign_file, callsign)
+        if callsign:
+            cleanup_files(callsign_file, callsign)
+
         time.sleep(interval)
 
 
