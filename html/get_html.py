@@ -47,7 +47,7 @@ if __name__ == "__main__":
     if (os_id == "debian"):
         port = '20202'
     else:
-        port = '8081'
+        port = '20202'
 
     addr = "127.0.0.1"
     url  = "http://" + addr + ":" + port
