@@ -21,7 +21,7 @@
  *
  */
 
-$version = "v.2.1.6";
+$version = "v.2.1.7";
 
 //==========================================================
 //  環境設定
@@ -535,8 +535,8 @@ $version = "v.2.1.6";
 
 			// 温度により色を変えて表示
 			echo '<span style="font-size:12pt;">Server Temp.: ';
-			if ($temp < 45) echo '<span style="color:green;">'.$temp."'C";
-			if ($temp >= 45 && $temp < 50) echo "<span style=\"color:yellow\">".$temp."'C";
+			if ($temp < 45) echo "<span style=\"color:white;background-color:green;\">".$temp."'C";
+			if ($temp >= 45 && $temp < 50) echo "<span style=\"color:black;background-color:yellow\">".$temp."'C";
 			if ($temp >= 50 && $temp < 55) echo "<span style=\"color:black;background-color:orange\">".$temp."'C";
 			if ($temp >= 55) echo "<span style=\"color:yellow; background-color:red;\">".$temp."'C";
 			pclose($fp);
