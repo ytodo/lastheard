@@ -3,10 +3,10 @@ Description=make database file from rpi-monitor log
 After = rpi-xchange.service
 
 [Service]
-ExecStart=python /var/www/lastheard/log2database.py
+ExecStart=python /var/www/lastherd/mqtt_rebooter.py
 Restart=always
 Type=simple
-PIDFile = /run/log2database.pid
+PIDFile = /run/mqtt_rebooter.pid
 
 [Install]
 WantedBy=multi-user.target

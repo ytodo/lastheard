@@ -21,113 +21,77 @@
  *
  */
 
-$version = "v.2.1.7";
+    $version = "v.2.2.0 - Debug";
+
+    // functionの定義
+    require_once '../lastheard/functions.php';
 
 //==========================================================
 //  環境設定
 //==========================================================
 
-	// 無線機器のカナ表示を有効にするためシフトJIS に設定
-	header('Content-type:text/html; charset=Shift_JIS');
+    // 環境設定の読み込み
+    load_env();
 
-	// 規定値でタイムゾーンを設定
-	date_default_timezone_set('Asia/Tokyo');
+    // 複数の変数を配列に読み込む
+    $config = load_conf();
 
-	// 対象のファイルパス
-	$logpath = '/var/log/lastheard.log';
-	$cfgpath = './conf/db.conf';
-	$timepath = './rpt/oldesttime.txt';
-	$lhuserspath = './rpt/lastheardusers.txt';
+    // ブート・リブート後60秒以内だったらリフレッシュを強制する
+    $uptime = (float) shell_exec("awk '{print $1}' /proc/uptime");
+    if ($uptime < 30)
+    {
+        $refresh = true;
 
-	// os-releaseを読込みOSを判断
-	$fp = popen("cat /etc/os-release", 'r');
-	$line = fgets($fp);
-	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-	pclose($fp);
-
-	if ($os_name == "Raspbian")
-	{
-		$multilogpath = '/var/log/rpi-multi_forward.log';	// Raspberry Pi
-	} else {
-		$multilogpath = '/var/log/multi_forward.log';		// AlmaLinux
-	}
-
-	// 設定ファイルから値を読み込む
-	$fp = fopen($cfgpath, 'r');
-	while(!feof($fp)) {
-		$line = fgets($fp);
-		if (preg_match("/RPTNAME/",  $line)) $rptname  = str_replace("\n", '', substr($line, 8));
-		if (preg_match("/RPTCALL/",  $line)) $rptcall  = str_replace("\n", '', substr($line, 8));
-		if (preg_match("/LINES/",    $line)) $lines    = str_replace("\n", '', substr($line, 6));
-		if (preg_match("/INTERVAL/", $line)) $interval = str_replace("\n", '', substr($line, 9));
-		if (preg_match("/HEAD_PIC/", $line)) $head_pic = str_replace("\n", '', substr($line, 9));
-		if (preg_match("/PIC_POSx/", $line)) $pic_posx = str_replace("\n", '', substr($line, 9));
-		if (preg_match("/PIC_POSy/", $line)) $pic_posy = str_replace("\n", '', substr($line, 9));
-		if (preg_match("/REPEAT/",   $line)) $repeat   = str_replace("\n", '', substr($line, 7));
-		if (preg_match("/BGCOLOR/",  $line)) $bgcolor  = str_replace("\n", '', substr($line, 8));
-		if (preg_match("/COMMENT/",  $line)) $comment  = str_replace("\n", '', substr($line, 8));
-	}
-	fclose($fp);
-
-	// WEB を指定秒数でリフレッシュ
-	$sec = intval($interval);
-
-	// このプログラムのファイル名を取得
-	$filename = basename(__FILE__);
-
-	// このプログラム自体をリフレッシュする
-	if ($filename == "index.php")
-	{
-		header("Refresh:$sec; url=index.php");      // index.php
-	} else {
-		header("Refresh:$sec; url=monitor.php");    // monitor.php
-	}
-
-
-//==========================================================
-//  表示用環境設定（db.confからの設定を反映）
-//==========================================================
+        // リプレッシュを必要に応じて指定間隔で実行
+        auto_refresh($config['interval'], $refresh);
+    }
 ?>
 
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
+<!--
+===========================================================
+    表示用環境設定（db_jp.confからの設定を反映）$config
+===========================================================
+-->
+
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+    <meta charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/db.css">
 
-<?php
-	echo '<title>'.$rptcall.' D-STAR DASHBOARD</title>';
-?>
-
-<link rel="stylesheet" href="css/db.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php
+	    echo '<title>'.$config['rptcall'].' D-STAR DASHBOARD</title>';
+    ?>
 </head>
 
 <?php
 	// <body> color の設定
-	$str = sprintf("<body style=\"background-color: %s;\">", $bgcolor);
+	$str = sprintf("<body style=\"background-color: %s;\">", $config['bgcolor']);
 	echo $str;
 
 	// <div.wrapper> も同色に設定  == ヘッダー部==
-	$str = sprintf("<div class=\"wrapper\" style=\"background-color: %s;\">", $bgcolor);
+	$str = sprintf("<div class=\"wrapper\" style=\"background-color: %s;\">", $config['bgcolor']);
 	echo $str;
 
 	// ヘッダー用の画像が指定されているときの処理
-	if ((is_null($head_pic) != true) || (empty($head_pic) != true))
+	if ((is_null($config['head_pic']) != true) || (empty($config['head_pic']) != true))
 	{
-		$str = sprintf("<div style=\"background: url('images/%s') %s %s %s;\">", $head_pic, $pic_posx, $pic_posy, $repeat);
+		$str = sprintf("<div style=\"background: url('images/%s') %s %s %s;\">", $config['head_pic'], $config['pic_posx'], $config['pic_posy'], $config['repeat']);
 		echo $str;
-		$flag = 1;
+		//$flag = 1;
 	}
 	else
 	{	// 指定されていないとき
 		echo '<div>';
 	}
 
-	echo '<h1>'.$rptcall.' '.$rptname.'</h1>';
-//	if ($flag == 1) echo '<br>';    // 画像を入れた場合タイトルと重なるのを防ぐ時は有効に
+	echo '<h1 style="margin-top:1em;margin-bottom:-7px;line-height:1.1em;">'.$config['rptcall'].' '.$config['rptname'].'</h1>';
+
+    $uptime_pretty = shell_exec('uptime -p');
+    echo '&nbsp;'.trim($uptime_pretty);
+
+	if ($config['br_flag'] == "enable") echo '<br clear="all">';
 
 
 //==========================================================
@@ -144,7 +108,7 @@ $version = "v.2.1.7";
 <?php
 
 	// Pythonスクリプトを実行しその出力をファイルとして読み取る(rpi-multi_forward Status WEB)
-	$command = "python get_html.py";
+	$command = "python ../lastheard/get_html.py";
 	$handle = popen($command, 'r');
 	$counter = 0;		// 必要な行を判別するためのカウンタ(必要行 100の台)
 
@@ -245,7 +209,7 @@ $version = "v.2.1.7";
 //  ラストハードの表示
 //===========================================================
 
-	echo '<h2>Last Heard '.$comment.'</h2>';
+	echo '<h2>Last Heard '.$config['comment'].'</h2>';
 ?>
 
 <table> <!-- ラストハードリスト--->
@@ -269,7 +233,7 @@ $version = "v.2.1.7";
 	$count = 0;
 	foreach ($tmp as $line)
 	{
-		if ($count < $lines)
+		if ($count < $config['lines'])
 		{
 			// 同じコールサイン（拡張子省く）の場合処理をパスする
 			$callsign  = substr($line, 31,  8);
@@ -288,7 +252,7 @@ $version = "v.2.1.7";
 			if ($temp == 'A') $type = 'ZR';
 			if ($temp == 'G') $type = 'GW';
 			$ur        = substr($line, 68,  8);
-			$message   = substr($line, 90, 20);
+			$message_sjis   = substr($line, 90, 20);
 
 			// もしsuffix欄がnullだったら（Noragateway対策）
 			if ($suffix == NULL)
@@ -298,8 +262,11 @@ $version = "v.2.1.7";
 				if ($temp == 'A') $type = 'ZR';
 				if ($temp == 'G') $type = 'GW';
 				$ur      = substr($line, 64,  8);
-				$message = substr($line, 86, 20);
+				$message_sjis = substr($line, 86, 20);
 			}
+
+            // メッセージのEncodeをUTF-8に変換する(php-mbstringのインストールが必要）
+            $message = mb_convert_encoding($message_sjis, 'UTF-8', 'SJIS');
 
 			// 各データをテーブルに表示
 			if ($timestamp != NULL)
@@ -394,8 +361,10 @@ $version = "v.2.1.7";
     <br><br>
 -->
 
-	<span style="color:white;font-size:16pt;">Version of Applications</span><br>
-	<hr size="0" width="30%" color="#333399">
+<!-- アプリケーションのバージョン情報を表示し、個別の管理WEBへのリンクを設定 -->
+
+	<span style="color:white;font-size:16pt;">アプリケーションのバージョン情報</span><br>
+	<hr size="0" width="50%" color="#333399">
 
 <?php
 	// os-releaseを読込みOSを判断
@@ -510,14 +479,16 @@ $version = "v.2.1.7";
 		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8080" target="_blank">'."xchange v.".$xchange_ver.'</a><br>';
 		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8081" target="_blank">'."multi_forward v.".$multi_ver.'</a><br>';
 		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8082" target="_blank">'."dprs v.".$dprs_ver.'</a></br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8083" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
+    	echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8083" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
 		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8084" target="_blank">'."decho v.".$decho_ver.'</a>';
 	}
 
 ?>
-
-	<hr size="0" width="30%" color="#333399">
+	<hr size="0" width="50%" color="#333399">
 	<br>
+
+    <!-- CPU の温度表示 -->
+
 	<div style="background-color:white;">
 		<?php   // Get temperature
 
@@ -535,16 +506,100 @@ $version = "v.2.1.7";
 
 			// 温度により色を変えて表示
 			echo '<span style="font-size:12pt;">Server Temp.: ';
-			if ($temp < 45) echo "<span style=\"color:white;background-color:green;\">".$temp."'C";
-			if ($temp >= 45 && $temp < 50) echo "<span style=\"color:black;background-color:yellow\">".$temp."'C";
-			if ($temp >= 50 && $temp < 55) echo "<span style=\"color:black;background-color:orange\">".$temp."'C";
-			if ($temp >= 55) echo "<span style=\"color:yellow; background-color:red;\">".$temp."'C";
+            if ($temp < 45) {
+                echo '<span style="color:white;background-color:green;">'.$temp.'℃</span>';
+            } elseif ($temp < 50) {
+                echo '<span style="color:black;background-color:yellow;">'.$temp.'℃</span>';
+            } elseif ($temp < 55) {
+                echo '<span style="color:black;background-color:orange;">'.$temp.'℃</span>';
+            } else {
+                echo '<span style="color:yellow; background-color:red;">'.$temp.'℃</span>';
+            }
 			pclose($fp);
 		?>
 	</div>
-</center>
-</div>
+    <br>
 
+    <?php
+
+    //
+    // パスワード認証によるダッシュボードからのサーバ再起動
+    //
+
+        if (isset($_GET['action']) && $_GET['action'] === 'reboot')
+        {
+            // リンクからの遷移ならフォームを表示
+            $show_form = true;
+            $refresh = false;
+
+        }
+
+        // パスワード認証処理
+        if ($_SERVER['REQUEST_METHOD'] === 'POST')
+        {
+            $password = $_POST['password'] ?? '';
+
+            if ($password === trim(getenv('AUTH_PASSWORD')))
+            {
+                // MQTTコマンドなどを実行
+                exec("sleep 5 && mosquitto_pub -h localhost -t 'raspi/control/reboot' -m 'REBOOT' > /dev/null 2>&1 &");
+                echo "<span style='color:white;font-size:12pt;'>✅ 認証成功：再起動コマンドを送信しました。</span>";
+
+                // 通常状態で自動リフレッシュ
+                $show_form = false;
+                $refresh = true;
+                $show_boot = false;
+            }
+            else
+            {
+                // 認証失敗
+                echo "<span style='color:white;font-size:12pt;'>❌ パスワードが間違っています。</span>";
+
+                // リンクからの遷移ならフォームを表示
+                $show_form = true;
+                $refresh = false;
+                $show_boot = false;
+            }
+
+        }
+    ?>
+
+    <!-- REBOOT リンク -->
+    <?php if ($show_boot): ?>
+        <a href="?action=reboot"><span style='font-size:12pt;color:white;'>REBOOT</span></a>
+    <?php endif; ?>
+
+    <!-- もしパスワード入力フォームが表示されていたら -->
+    <?php if ($show_form): ?>
+        <form method="POST" style="margin-top: 10px; font-size;12pt;">
+            <input type="password" name="password" placeholder="Input password." required autofocus>
+            <input type="submit" value="Send">
+        </form>
+    <?php endif; ?>
+</center>
+
+    <?php
+    // リプレッシュを必要に応じて指定間隔で実行
+    auto_refresh($config['interval'], $refresh);
+    ?>
+
+
+<!-- $refresh が true の時はクエリーをクリアしたオリジナルトップページを表示する(完全リフレッシュ)
+<script>
+    const interval = <?=(int)$config['interval'] * 1000 ?>;
+    var shouldRefresh = <?= $refresh ? 'true' : 'false' ?>;
+
+
+    if (shouldRefresh) {
+        setTimeout(function () {
+            const clearUrl = window.location.origin + window.location.pathname;
+            window.location.href = clearUrl;
+        }, interval);
+    }
+</script>
+-->
+</div>
 </div>
 </body>
 </html>
+
