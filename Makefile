@@ -9,6 +9,7 @@
 # Program Name and object files
 PROGRAM	= lastheard
 OBJECTS	= recv.o
+USER_NAME = $(shell whoami)
 
 # Redefine MACRO
 CC		= gcc
@@ -35,6 +36,9 @@ $(OBJECTS)	: recv.h
 # OSの判別
 DISTRO 	:= $(shell . /etc/os-release && echo $$ID)
 
+print-distro:
+	@echo "DISTRO = $(DISTRO)"
+
 ### Install files ###
 install :
 
@@ -48,18 +52,23 @@ install :
 	@sudo cp -rf ./html/			/var/www
 	@sudo mkdir -p /var/www/lastheard
 	@sudo cp -rf ./lastheard.dir	/var/www/lastheard
+	@sudo chown $(USER_NAME):$(USER_NAME) /var/www/lastheard
 
 ifeq ($DISTRO),debian)
 	@sudo apt update
 	@sudo apt install -y python3-pip
 	@sudo apt install -y mosquitto mosquitto-clients
 	@sudo apt install -y php-mbstring
+	@cd /var/www/lastheard && \
+	python3 -m venv venv && \
+	. venv/bin/activate && \
+	pip3 install paho-mqtt
 else
 	@sudo dnf install -y python3-pip
 	@sudo dnf install -y mosquitto mosquitto-devel
 	@sudo dnf install -y php-mbstring
-endif
 	@pip3 install paho-mqtt
+endif
 
 # ユニットファイルの配置
 	@echo "ユニットファイルを配置しています..."
@@ -102,18 +111,23 @@ update  :
 	@sudo cp ./lastheard.dir/*.py		/var/www/lastheard
 	@sudo cp ./lastheard.dir/*.php		/var/www/lastheard
 	@sudo cp ./lastheard.dir/.htaccess	/var/www/lastheard
+	@sudo chown $(USER_NAME):$(USER_NAME) /var/www/lastheard
 
-ifeq ($DISTRO),debian)
+ifeq ($(DISTRO),debian)
 	@sudo apt update
 	@sudo apt install -y python3-pip
 	@sudo apt install -y mosquitto mosquitto-clients
 	@sudo apt install -y php-mbstring
+	@cd /var/www/lastheard && \
+	python3 -m venv venv && \
+	. venv/bin/activate && \
+	pip3 install paho-mqtt
 else
 	@sudo dnf install -y python3-pip
 	@sudo dnf install -y mosquitto mosquitto-devel
 	@sudo dnf install -y php-mbstring
-endif
 	@pip3 install paho-mqtt
+endif
 
 
 # ユニットファイルの配置
@@ -136,10 +150,10 @@ endif
 	@sudo systemctl restart  mosquitto.service
 	@sudo systemctl enable mqtt_rebooter.service    > /dev/null
 	@sudo systemctl restart  mqtt_rebooter.service
+	@sudo systemctl enable  mqtt_rebooter.service	> /dev/null
+	@sudo systemctl restart mqtt_rebooter.service
 
 ifeq ($(DISTRO), debian)
 	@sudo systemctl enable  log2database.service	> /dev/null
 	@sudo systemctl restart log2database.service
 endif
-	@sudo systemctl enable  mqtt_rebooter.service	> /dev/null
-	@sudo systemctl restart mqtt_rebooter.service

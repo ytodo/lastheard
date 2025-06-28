@@ -1,5 +1,5 @@
 [Unit]
-Description = LastHeard daemon
+Description = LastHeard daemon for AlmaLinux
 After = xchange.service
 
 [Service]

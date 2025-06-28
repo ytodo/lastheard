@@ -4,7 +4,7 @@
  *
  *  変数の定義、関数の定義
  *
- *  Created : 2025.6.25  Last updated : 2025.6.26
+ *  Created : 2025.6.25  Last updated : 2025.6.29
  *****************************************************************************/
 
     // 規定値でタイムゾーンを設定
@@ -80,17 +80,17 @@
         while(!feof($fp))
         {
             $line = fgets($fp);
-            if (preg_match("/RPTNAME/",  $line)) $config['rptname']  = trim(substr($line, 8));
-            if (preg_match("/RPTCALL/",  $line)) $config['rptcall']  = trim(substr($line, 8));
-            if (preg_match("/LINES/",    $line)) $config['lines']    = trim(substr($line, 6));
-            if (preg_match("/INTERVAL/", $line)) $config['interval'] = trim(substr($line, 9));
-            if (preg_match("/HEAD_PIC/", $line)) $config['head_pic'] = trim(substr($line, 9));
-            if (preg_match("/PIC_POSx/", $line)) $config['pic_posx'] = trim(substr($line, 9));
-            if (preg_match("/PIC_POSy/", $line)) $config['pic_posy'] = trim(substr($line, 9));
-            if (preg_match("/REPEAT/",   $line)) $config['repeat']   = trim(substr($line, 7));
-            if (preg_match("/BGCOLOR/",  $line)) $config['bgcolor']  = trim(substr($line, 8));
-            if (preg_match("/COMMENT/",  $line)) $config['comment']  = trim(substr($line, 8));
-            if (preg_match("/BR_FLAG/",  $line)) $config['br_flag']  = trim(substr($line, 8));
+            if (preg_match("/RPTNAME/",  $line)) $config['rptname']  = trim(substr($line, 8));		// リピータの名前
+            if (preg_match("/RPTCALL/",  $line)) $config['rptcall']  = trim(substr($line, 8));		// リピータのコールサイン
+            if (preg_match("/LINES/",    $line)) $config['lines']    = trim(substr($line, 6));		// ラストハードの表示行数
+            if (preg_match("/INTERVAL/", $line)) $config['interval'] = trim(substr($line, 9));		// リフレッシュの間隔
+            if (preg_match("/HEAD_PIC/", $line)) $config['head_pic'] = trim(substr($line, 9));		// 画像のURL
+            if (preg_match("/PIC_POSx/", $line)) $config['pic_posx'] = trim(substr($line, 9));		// 画像表示位置（WEBトップからのドット数
+            if (preg_match("/PIC_POSy/", $line)) $config['pic_posy'] = trim(substr($line, 9));		// 　　〃　　　（WEB左からのドット数
+            if (preg_match("/REPEAT/",   $line)) $config['repeat']   = trim(substr($line, 7));		// 画像を繰り返し表示するか
+            if (preg_match("/BGCOLOR/",  $line)) $config['bgcolor']  = trim(substr($line, 8));		// 背景色
+            if (preg_match("/COMMENT/",  $line)) $config['comment']  = trim(substr($line, 8));		// コメント
+            if (preg_match("/BR_FLAG/",  $line)) $config['br_flag']  = trim(substr($line, 8));		// 画像がリピータ名に重ならないようにする
         }
         fclose($fp);
 
@@ -123,7 +123,4 @@
         </script>
         EOT;
     }
-
-
-
 ?>

@@ -1,6 +1,6 @@
 [Unit]
-Description=mosquitto listener execute script.
-After = xchange.service
+Description=mosquitto listener execute script for AlmaLinux
+After=network.target
 
 [Service]
 ExecStart=python /var/www/lastheard/mqtt_rebooter.py
