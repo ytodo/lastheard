@@ -1,0 +1,11 @@
+[Unit]
+Description=mosquitto listener execute script.
+
+[Service]
+ExecStart=python /var/www/lastheard/mqtt_rebooter.py
+Restart=always
+Type=simple
+PIDFile = /run/mqtt_rebooter.pid
+
+[Install]
+WantedBy=multi-user.target

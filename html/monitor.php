@@ -21,7 +21,7 @@
  *
  */
 
-    $version = "v.2.2.0 - Debug";
+    $version = "v.2.2.1";
 
     // functionの定義
     require_once '../lastheard/functions.php';
@@ -36,14 +36,21 @@
     // 複数の変数を配列に読み込む
     $config = load_conf();
 
-    // ブート・リブート後60秒以内だったらリフレッシュを強制する
-    $uptime = (float) shell_exec("awk '{print $1}' /proc/uptime");
-    if ($uptime < 30)
-    {
-        $refresh = true;
+	// /proc/uptime から起動後の時間を読む
+    if ($os_name == "Raspbian")
+	{
+		$uptime = (float) shell_exec("awk '{print $1}' /proc/uptime");		// Alma用のコードでRasPiもOKなら削除
+	} else {
+		$uptime_data = file_get_contents("/proc/uptime");
+		$uptime_parts = explode(" ", $uptime_data);
+		$uptime = floatval($uptime_parts[0]);
+	}
 
+    // ブート・リブート後60秒以内だったらリフレッシュを強制する
+    if ($uptime < 60)
+    {
         // リプレッシュを必要に応じて指定間隔で実行
-        auto_refresh($config['interval'], $refresh);
+        auto_refresh($config['interval'], true);
     }
 ?>
 
@@ -172,7 +179,6 @@
 		}
 
 		pclose($handle);
-
 	}
 
 	//----------------------------------------------------------
@@ -273,6 +279,7 @@
 			{
 				echo '<tr><td>'.$timestamp.'</td>';
 
+				// R
 				if ($os_name == "Raspbian")
 				{
 					// $callsignに空白が含まれる場合 $callsign_link にアンダースコアと置き換えたものを入れる
@@ -344,34 +351,35 @@
 </table> <!-- ラストハードリストend --->
 
 
-<!-- フッター この部分はCC-BY-NC-SAに準じて消さないでください。------------------------------------------------------->
 <div class="footer">
-	<center>
+<center>
+
+	<!-- フッター この部分はCC-BY-NC-SAに準じて消さないでください。------------------------------------------------------->
 	<span class="footer">D-STAR X-change Copyright(c) JARL D-STAR Committee. <br>
 		<b>LastHeard <?php echo $version ?></b> applications are created by Yosh Todo/JE3HCZ <b>CC-BY-NC-SA</b></span>
-<!-- ここまで Creative Commons BY-NC-SA ------------------------------------------------------------------------------>
+	<!-- ここまで Creative Commons BY-NC-SA ------------------------------------------------------------------------------>
 	<br><br>
 
 
-<!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
-<!--
+	<!-- このメッセージ欄は適宜変更してお使いください。上下のコメントタグを削除すると有効になります。 -------------------->
+	<!--
     <span style="color:#ffffff;font-size:16pt;"><b>D-STAR GATEWAY on Raspberry Pi OS Bookworm 64bit</b></span><BR>
     <span style="color:#ffffff;font-size:16pt;"><b>and Echo Server is available on JL3ZBS Z</b></span><br>
 	<span style="color:#333399;font-size:16pt;"><b>Last Heard is also available on AlmaLinux</b></span>
     <br><br>
--->
+	-->
 
-<!-- アプリケーションのバージョン情報を表示し、個別の管理WEBへのリンクを設定 -->
+	<!-- アプリケーションのバージョン情報を表示し、個別の管理WEBへのリンクを設定 -->
 
 	<span style="color:white;font-size:16pt;">アプリケーションのバージョン情報</span><br>
 	<hr size="0" width="50%" color="#333399">
 
-<?php
+	<?php
 	// os-releaseを読込みOSを判断
-	$fp = popen("cat /etc/os-release", 'r');
-	$line = fgets($fp);
-	if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-	pclose($fp);
+	//$fp = popen("cat /etc/os-release", 'r');
+	//$line = fgets($fp);
+	//if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+	//pclose($fp);
 
 	// このサーバのグローバルIPアドレスを取得
 	if ($filename == "index.php")
@@ -483,121 +491,110 @@
 		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8084" target="_blank">'."decho v.".$decho_ver.'</a>';
 	}
 
-?>
+	?>
+
 	<hr size="0" width="50%" color="#333399">
 	<br>
 
     <!-- CPU の温度表示 -->
 
 	<div style="background-color:white;">
-		<?php   // Get temperature
+	<?php   // Get temperature
 
-			if ($os_name == "Raspbian")
-			{
-				$fp = popen("cat /sys/class/thermal/thermal_zone0/temp", 'r');
-				$temp = fgets($fp);
-				$temp = round($temp * 0.001,1);
-				if (strlen($temp) < 3) $temp = $temp.".0";
-			}
-			else    // AlmaLinux
-			{
-				$temp = shell_exec("sensors | awk '/Package id 0:/ { gsub(/\\+|°C/, \"\", \$4); printf \"%.1f\\n\", \$4 }'");
-			}
-
-			// 温度により色を変えて表示
-			echo '<span style="font-size:12pt;">Server Temp.: ';
-            if ($temp < 45) {
-                echo '<span style="color:white;background-color:green;">'.$temp.'℃</span>';
-            } elseif ($temp < 50) {
-                echo '<span style="color:black;background-color:yellow;">'.$temp.'℃</span>';
-            } elseif ($temp < 55) {
-                echo '<span style="color:black;background-color:orange;">'.$temp.'℃</span>';
-            } else {
-                echo '<span style="color:yellow; background-color:red;">'.$temp.'℃</span>';
-            }
+		if ($os_name == "Raspbian")
+		{
+			$fp = popen("cat /sys/class/thermal/thermal_zone0/temp", 'r');
+			$temp = fgets($fp);
+			$temp = round($temp * 0.001,1);
+			if (strlen($temp) < 3) $temp = $temp.".0";
 			pclose($fp);
-		?>
+		}
+		else    // AlmaLinux  要インストール lm-sensors / sensors-detectを一度実行（すべてデフォルトでEnter）
+		{
+			$temp = shell_exec("sensors | awk '/Package id 0:/ { gsub(/\\+|°C/, \"\", \$4); printf \"%.1f\\n\", \$4 }'");
+		}
+
+		// 温度により色を変えて表示
+		echo '<span style="font-size:12pt;">Server Temp.: ';
+
+        if ($temp < 45) {
+            echo '<span style="color:white;background-color:green;">'.$temp.'℃</span>';
+        } elseif ($temp < 50) {
+            echo '<span style="color:black;background-color:yellow;">'.$temp.'℃</span>';
+        } elseif ($temp < 55) {
+             echo '<span style="color:black;background-color:orange;">'.$temp.'℃</span>';
+        } else {
+            echo '<span style="color:yellow; background-color:red;">'.$temp.'℃</span>';
+        }
+	?>
 	</div>
     <br>
 
-    <?php
-
+	<?php
     //
     // パスワード認証によるダッシュボードからのサーバ再起動
     //
 
-        if (isset($_GET['action']) && $_GET['action'] === 'reboot')
+	// action=reboot が付いているとき
+    if (isset($_GET['action']) && $_GET['action'] === 'reboot')
+    {
+        // リンクからの遷移ならフォームを表示しリフレッシュを止める
+        $show_form = true;
+        $refresh = false;
+    }
+
+    // パスワード認証処理
+    if ($_SERVER['REQUEST_METHOD'] === 'POST')
+    {
+        $password = $_POST['password'] ?? '';
+
+		// 入力パスワードが別途保存したパスワードと合致したとき
+        if ($password === trim(getenv('AUTH_PASSWORD')))
         {
-            // リンクからの遷移ならフォームを表示
+            // MQTTコマンドなどを実行
+            exec("sleep 5 && mosquitto_pub -h localhost -t 'raspi/control/reboot' -m 'REBOOT' > /dev/null 2>&1 &");
+            echo "<span style='color:white;font-size:12pt;'>✅ 認証成功：再起動コマンドを送信しました。</span>";
+
+            //フォームとREBOOTリンクを消し、自動リフレッシュ
+            $show_form = false;
+            $refresh = true;
+            $show_boot = false;
+        }
+        else
+        {
+            // 認証失敗
+            echo "<span style='color:white;font-size:12pt;'>❌ パスワードが間違っています。</span>";
+
+            // フォームを表示したまま、メッセージのみ表示（REBOOTは消す）し、リフレッシュも止めたまま
             $show_form = true;
             $refresh = false;
-
+            $show_boot = false;
         }
 
-        // パスワード認証処理
-        if ($_SERVER['REQUEST_METHOD'] === 'POST')
-        {
-            $password = $_POST['password'] ?? '';
+    }
 
-            if ($password === trim(getenv('AUTH_PASSWORD')))
-            {
-                // MQTTコマンドなどを実行
-                exec("sleep 5 && mosquitto_pub -h localhost -t 'raspi/control/reboot' -m 'REBOOT' > /dev/null 2>&1 &");
-                echo "<span style='color:white;font-size:12pt;'>✅ 認証成功：再起動コマンドを送信しました。</span>";
+	?>
 
-                // 通常状態で自動リフレッシュ
-                $show_form = false;
-                $refresh = true;
-                $show_boot = false;
-            }
-            else
-            {
-                // 認証失敗
-                echo "<span style='color:white;font-size:12pt;'>❌ パスワードが間違っています。</span>";
+	<!-- REBOOT リンク -->
+	<?php if ($show_boot): ?>
+    	<a href="?action=reboot"><span style='font-size:12pt;color:white;'>REBOOT</span></a>
+	<?php endif; ?>
 
-                // リンクからの遷移ならフォームを表示
-                $show_form = true;
-                $refresh = false;
-                $show_boot = false;
-            }
-
-        }
-    ?>
-
-    <!-- REBOOT リンク -->
-    <?php if ($show_boot): ?>
-        <a href="?action=reboot"><span style='font-size:12pt;color:white;'>REBOOT</span></a>
-    <?php endif; ?>
-
-    <!-- もしパスワード入力フォームが表示されていたら -->
-    <?php if ($show_form): ?>
-        <form method="POST" style="margin-top: 10px; font-size;12pt;">
-            <input type="password" name="password" placeholder="Input password." required autofocus>
-            <input type="submit" value="Send">
-        </form>
-    <?php endif; ?>
+	<!-- もしパスワード入力フォームが表示されていたら -->
+	<?php if ($show_form): ?>
+    <form method="POST" style="margin-top: 10px; font-size:12pt;">
+        <input type="password" name="password" placeholder="Input password." required autofocus>
+        <input type="submit" value="Send">
+    </form>
+	<?php endif; ?>
 </center>
 
-    <?php
-    // リプレッシュを必要に応じて指定間隔で実行
+<?php
+	// リプレッシュを必要に応じて指定間隔で実行
     auto_refresh($config['interval'], $refresh);
-    ?>
+?>
 
 
-<!-- $refresh が true の時はクエリーをクリアしたオリジナルトップページを表示する(完全リフレッシュ)
-<script>
-    const interval = <?=(int)$config['interval'] * 1000 ?>;
-    var shouldRefresh = <?= $refresh ? 'true' : 'false' ?>;
-
-
-    if (shouldRefresh) {
-        setTimeout(function () {
-            const clearUrl = window.location.origin + window.location.pathname;
-            window.location.href = clearUrl;
-        }, interval);
-    }
-</script>
--->
 </div>
 </div>
 </body>

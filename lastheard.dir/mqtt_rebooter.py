@@ -1,3 +1,4 @@
+from paho.mqtt.client import CallbackAPIVersion
 import paho.mqtt.client as mqtt
 import os
 
@@ -10,7 +11,7 @@ def on_message(client, userdata, msg):
         if msg.payload.decode() == MQTT_PASSWORD:
             os.system("sudo reboot")
 
-client = mqtt.Client()
+client = mqtt.Client(protocol=mqtt.MQTTv311, callback_api_version=CallbackAPIVersion.VERSION2)
 client.connect(MQTT_BROKER, 1883, 60)
 client.subscribe(MQTT_TOPIC)
 client.on_message = on_message
