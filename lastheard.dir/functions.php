@@ -123,4 +123,18 @@
         </script>
         EOT;
     }
+
+
+	// ログインユーザを取得する関数
+	function get_login_user()
+	{
+		// シェルコマンドの返りを取得
+		$p = popen("who", "r");
+		$output = fgets($p);
+		pclose($p);
+
+		// 空白で分割し、最初の要素(ユーザ名)を得る
+		$fields = preg_split('/\s+/', trim($output));
+		return $fields[0];
+	}
 ?>

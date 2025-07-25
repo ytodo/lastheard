@@ -21,10 +21,10 @@
  *
  */
 
-    $version = "v.2.2.1";
+    $version = "v.2.2.2";
 
     // functionの定義
-    require_once '../lastheard/functions.php';
+    require_once '/opt/lastheard/scripts/functions.php';
 
 //==========================================================
 //  環境設定
@@ -114,8 +114,20 @@
 
 <?php
 
+	// Python仮想環境を使用する準備
+	$user = get_login_user();
+
+	// root と他のユーザに分けて環境を変える
+	if ($user == "root")
+	{
+		$command = "python /opt/lastheard/scripts/get_html.py";
+	}
+	else
+	{
+		$commsnd = "/home/".$user."/.lastheard_venv/bin/python /opt/lastheard/scripts/get_html.py"
+	}
+
 	// Pythonスクリプトを実行しその出力をファイルとして読み取る(rpi-multi_forward Status WEB)
-	$command = "python ../lastheard/get_html.py";
 	$handle = popen($command, 'r');
 	$counter = 0;		// 必要な行を判別するためのカウンタ(必要行 100の台)
 
