@@ -21,10 +21,10 @@
  *
  */
 
-    $version = "v.2.2.1";
+    $version = "v.2.2.3";
 
     // functionの定義
-    require_once '../lastheard/functions.php';
+    require_once '/opt/lastheard/scripts/functions.php';
 
 //==========================================================
 //  環境設定
@@ -115,7 +115,7 @@
 <?php
 
 	// Pythonスクリプトを実行しその出力をファイルとして読み取る(rpi-multi_forward Status WEB)
-	$command = "python ../lastheard/get_html.py";
+	$command = "python /opt/lastheard/scripts/get_html.py";
 	$handle = popen($command, 'r');
 	$counter = 0;		// 必要な行を判別するためのカウンタ(必要行 100の台)
 
