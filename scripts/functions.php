@@ -34,7 +34,12 @@
     // os-releaseを読込みOSを判断
     $fp = popen("cat /etc/os-release", 'r');
     $line = fgets($fp);
-    if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
+    if (preg_match("/Debian/", $line))
+    {
+        $os_name = "Raspbian";
+    } else {
+        $os_name = "AlmaLinux";
+	}
     pclose($fp);
 
     // OS名とOSごとのログファイルパスを定義
@@ -51,7 +56,7 @@
     //
 
     // .env ローダー
-    function load_env($path = '../lastheard/.env')
+    function load_env($path = '/opt/lastheard/conf/.env')
     {
         // ファイルが無かったら戻る
         if (!file_exists($path)) return;

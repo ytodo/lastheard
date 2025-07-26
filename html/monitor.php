@@ -374,14 +374,10 @@
 	<span style="color:white;font-size:16pt;">アプリケーションのバージョン情報</span><br>
 	<hr size="0" width="50%" color="#333399">
 
-	<?php
-	// os-releaseを読込みOSを判断
-	//$fp = popen("cat /etc/os-release", 'r');
-	//$line = fgets($fp);
-	//if (preg_match("/Debian/", $line)) $os_name = "Raspbian";
-	//pclose($fp);
+<?php
 
 	// このサーバのグローバルIPアドレスを取得
+	$filename = basename($_SERVER['PHP_SELF']);
 	if ($filename == "index.php")
 	{
 		$server_ip = file_get_contents('https://api.ipify.org');
@@ -484,11 +480,11 @@
 
 		// バージョン情報を表示
 		echo '<span style="font-size:12pt; color:white;">'."dsgwd v.".$dsgwd_ver.'</span><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8080" target="_blank">'."xchange v.".$xchange_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8081" target="_blank">'."multi_forward v.".$multi_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8082" target="_blank">'."dprs v.".$dprs_ver.'</a></br>';
-    	echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8083" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
-		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':8084" target="_blank">'."decho v.".$decho_ver.'</a>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20201" target="_blank">'."xchange v.".$xchange_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20202" target="_blank">'."multi_forward v.".$multi_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20203" target="_blank">'."dprs v.".$dprs_ver.'</a></br>';
+    	echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20204" target="_blank">'."dstatus v.".$dstatus_ver.'</a><br>';
+		echo '<a style="font-size:12pt; color:white;" href="http://'.$server_ip.':20205" target="_blank">'."decho v.".$decho_ver.'</a>';
 	}
 
 	?>
