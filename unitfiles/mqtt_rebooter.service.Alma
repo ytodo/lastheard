@@ -3,7 +3,7 @@ Description=mosquitto listener execute script for AlmaLinux
 After=network.target
 
 [Service]
-ExecStart=python /var/www/lastheard/mqtt_rebooter.py
+ExecStart=python /opt/lastheard/scripts/mqtt_rebooter.py
 Restart=always
 Type=simple
 
