@@ -3,7 +3,7 @@ Description = LastHeard daemon for AlmaLinux
 After = xchange.service
 
 [Service]
-ExecStart = /usr/local/bin/lastheard
+ExecStart = /opt/lastheard/bin/lastheard
 Restart = always
 Type = simple
 
