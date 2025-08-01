@@ -215,7 +215,7 @@
 //  ラストハードの表示
 //===========================================================
 
-	echo '<h2>Last Heard '.$config['comment'].'</h2>';
+	echo '<h2>Last Heard <span style="float:right;">' . $config['comment'] . '</span></h2>';
 ?>
 
 <table> <!-- ラストハードリスト--->
