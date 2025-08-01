@@ -1,12 +1,12 @@
 [Unit]
 Description=make database file from rpi-monitor log
-After = rpi-xchange.service
+After=rpi-xchange.service
 
 [Service]
-ExecStart=python /oppt/lastheard/scripts/log2database.py
+ExecStart=python /opt/lastheard/scripts/log2database.py
 Restart=always
 Type=simple
-PIDFile = /run/log2database.pid
+PIDFile=/run/log2database.pid
 
 [Install]
 WantedBy=multi-user.target

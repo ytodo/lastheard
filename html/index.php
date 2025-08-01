@@ -21,7 +21,7 @@
  *
  */
 
-    $version = "v.2.2.3";
+    $version = "v.2.2.4";
 
     // functionの定義
     require_once '/opt/lastheard/scripts/functions.php';

@@ -1,11 +1,11 @@
 [Unit]
-Description = LastHeard daemon for AlmaLinux
-After = xchange.service
+Description=LastHeard daemon for AlmaLinux
+After=xchange.service
 
 [Service]
-ExecStart = /opt/lastheard/bin/lastheard
-Restart = always
-Type = simple
+ExecStart=/opt/lastheard/bin/lastheard
+Restart=always
+Type=simple
 
 [Install]
-WantedBy = multi-user.target
+WantedBy=multi-user.target
