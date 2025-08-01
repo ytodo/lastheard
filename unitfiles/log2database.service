@@ -3,7 +3,7 @@ Description=make database file from rpi-monitor log
 After = rpi-xchange.service
 
 [Service]
-ExecStart=python /var/www/lastheard/log2database.py
+ExecStart=python /oppt/lastheard/scripts/log2database.py
 Restart=always
 Type=simple
 PIDFile = /run/log2database.pid

@@ -3,7 +3,7 @@ Description = LastHeard daemon for Raspbian
 After = rpi-dsgwd.service
 
 [Service]
-ExecStart = /ope/lastheard/bin/lastheard
+ExecStart = /opt/lastheard/bin/lastheard
 Restart = always
 Type = simple
 
