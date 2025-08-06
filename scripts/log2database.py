@@ -3,7 +3,7 @@
 #   rpi-monitor.logを整理して各ユーザごとの情報データベースを作成       #
 #                                                                       #
 app_name = "log2database.py"                                            #
-app_ver  = "0.0.6"                                                      #
+app_ver  = "0.0.7"                                                      #
 #                                                                       #
 #                  Copyright (C) 2025  Created by Y.Todo / JE3HCZ       #
 #########################################################################
@@ -131,11 +131,16 @@ def cleanup_files(callsign_file, callsign):
         }
 
     # マージ
+    logging.info(f"現ユーザファイル : {list_files}")
+
     #keep_files |= list_files
     logging.info(f"削除除外ファイル : {keep_files}")
 
     # フォルダ内のファイルを取得
     for file_name in os.listdir(folder_path):
+
+        if file_name == ".htaccess":
+            continue
 
         # ファイルのパスを取得
         file_path = os.path.join(folder_path, file_name)
@@ -144,34 +149,31 @@ def cleanup_files(callsign_file, callsign):
         if callsign and file_name.startswith(callsign):
 
             # 削除除外ファイルなら削除せずパス（直近取得したデータ）
-            if file_name in keep_files:
+            if file_name.strip() in (file.strip() for file in keep_files):
                 continue
-
-            # 同ユーザーの過去のファイルは削除
             else:
                 os.remove(file_path)
                 logging.info(f"Deleted: {file_path}")
 
     # フォルダ内のファイルを取得
-    for file_name in os.listdir(folder_path):
+    #for file_name in os.listdir(folder_path):
 
         # LastHeardリストに表示されているユーザのファイルは残しその他は捨てる
-        for pattern in list_files:
+        #for pattern in (file.strip() for file in list_files):
 
-            should_remove = True
+            #should_remove = True
 
             # 削除除外ファイルなら削除せずパス（直近取得したデータ）
-            if file_name in keep_files:
-                continue
+            #if file_name.strip() in (file.strip() for file in keep_files):
+                #continue
 
-            if fnmatch.fnmatch(file_name, pattern):
-                should_remove = False
-                continue
+            #if fnmatch.fnmatch(file_name.strip(), pattern.strip()):
+                #continue
 
-            if should_remove:
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-                    logging.info(f"Deleted: {file_path}")
+            #if should_remove:
+                #if os.path.exists(file_path):
+                    #os.remove(file_path)
+                    #logging.info(f"Deleted: {file_path}")
                 #else:
                     #logging.info(f"存在しないファイル: {file_path}")
 
